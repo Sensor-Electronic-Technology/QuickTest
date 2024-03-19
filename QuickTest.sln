@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickTest.Data", "QuickTest.Data\QuickTest.Data.csproj", "{B91230EA-669F-48ED-8CCA-9C00A4D626EC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{1F2513CF-CA1F-44BF-BB56-88BE77738363}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickTest.Api", "QuickTest.Api\QuickTest.Api.csproj", "{B23E9DE2-1E4F-49F3-8B71-39ECE55DD9DA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontend", "Frontend", "{E5165516-9F00-4A4A-878F-D92730659BA5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B91230EA-669F-48ED-8CCA-9C00A4D626EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B91230EA-669F-48ED-8CCA-9C00A4D626EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B91230EA-669F-48ED-8CCA-9C00A4D626EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B91230EA-669F-48ED-8CCA-9C00A4D626EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B23E9DE2-1E4F-49F3-8B71-39ECE55DD9DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B23E9DE2-1E4F-49F3-8B71-39ECE55DD9DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B23E9DE2-1E4F-49F3-8B71-39ECE55DD9DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B23E9DE2-1E4F-49F3-8B71-39ECE55DD9DA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B91230EA-669F-48ED-8CCA-9C00A4D626EC} = {1F2513CF-CA1F-44BF-BB56-88BE77738363}
+		{B23E9DE2-1E4F-49F3-8B71-39ECE55DD9DA} = {E5165516-9F00-4A4A-878F-D92730659BA5}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageId>QuickTest.Data</PackageId>
+        <Version>1.0.0</Version>
+        <Authors>Andrew Elmendorf</Authors>
+        <Company>Sensor Electronic Technology</Company>
+        <PackageDescription>Data for QuickTest</PackageDescription>
+        <RepositoryUrl>https://github.com/OWNER/REPOSITORY</RepositoryUrl>
+    </PropertyGroup>
+
+</Project>
