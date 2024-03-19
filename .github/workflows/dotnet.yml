@@ -29,7 +29,15 @@ jobs:
         file: QuickTest.Data/QuickTest.Data.csproj
     - name: Print
       run: echo ${{ steps.test.package_version.version }}
-    - name: Package
-      run: dotnet pack --configuration Release
-    - name: Publish
-      run: dotnet nuget push "bin/Release/QuickTest.Data.${{ steps.test.package_version.version }}.nupkg" --source "github"
+      
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: microk8s.kubectl rollout restart deployment webapp
+      - name: Package
+        run: dotnet pack --configuration Release
+      - name: Publish
+        run: dotnet nuget push "bin/Release/QuickTest.Data.${{ steps.test.package_version.version }}.nupkg" --source "github"
+   
