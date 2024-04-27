@@ -1,5 +1,6 @@
 using Ardalis.SmartEnum;
-namespace QuickTest.Data.Wafer;
+
+namespace QuickTest.Data.Wafer.Enums;
 
 public class WaferArea : SmartEnum<WaferArea, string> {
     public static WaferArea Center = new WaferArea(nameof(Center), "C");

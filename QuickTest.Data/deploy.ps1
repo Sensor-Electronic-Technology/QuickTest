@@ -25,7 +25,9 @@ $outputPath="C:/Users/aelmendo/RiderProjects/QuickTest/QuickTest.Data/bin/Releas
 $csprojcontents.Project.PropertyGroup.Version = $newversionNumber
 $csprojcontents.Save($csprojfilename)
 dotnet pack $csprojfilename --configuration Release 
-dotnet nuget push $outputPath --source "github" 
+<#dotnet nuget push $outputPath --source "github" #>
+dotnet nuget push -s http://172.20.4.15:8081/v3/index.json $outputPath
+
 
 
 <# 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

@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>QuickTest.Data</PackageId>
-    <Version>1.0.11-stable</Version>
+    <Version>1.0.3</Version>
     <Authors>Andrew Elmendorf</Authors>
     <Company>Sensor Electronic Technology</Company>
     <PackageDescription>Data for QuickTest</PackageDescription>
@@ -14,6 +14,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Ardalis.SmartEnum" Version="8.0.0" />
-    <PackageReference Include="MongoDB.Driver" Version="*" />
+    <PackageReference Include="MongoDB.Driver" Version="2.25.0" />
+    <PackageReference Include="FastEndpoints" Version="5.24.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Dtos\" />
   </ItemGroup>
 </Project>
