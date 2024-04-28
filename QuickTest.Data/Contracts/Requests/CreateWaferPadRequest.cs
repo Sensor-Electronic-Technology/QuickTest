@@ -1,5 +1,5 @@
-﻿using QuickTest.Data.Wafer;
-using QuickTest.Data.Wafer.Enums;
+﻿using QuickTest.Data.Models.Wafers;
+using QuickTest.Data.Models.Wafers.Enums;
 
 namespace QuickTest.Data.Dtos;
 
@@ -7,7 +7,7 @@ public class CreateWaferPadRequest {
     public required WaferSize WaferSize { get; set; }
     public required PadLocation PadLocation { get; set; }
     public required WaferArea WaferArea { get; set; }
-    public required SvgObject SvgObject { get; set; }
+    public required PadMapDefinition PadMapDefinition { get; set; }
     public required int PadNumber { get; set; }
 
     public CreateWaferPadRequest() {

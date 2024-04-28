@@ -1,5 +1,6 @@
 ﻿using Ardalis.SmartEnum;
-namespace QuickTest.Data.Wafer;
+
+namespace QuickTest.Data.Models.Wafers.Enums;
 
 public class PadLocation : SmartEnum<PadLocation, string> {
     public static PadLocation PadLocationA = new PadLocation(nameof(PadLocationA), "A");

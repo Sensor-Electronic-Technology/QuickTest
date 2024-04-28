@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using QuickTest.Data.Contracts.Responses;
 using QuickTest.Data.Dtos;
 using QuickTest.Data.Mappers;
-using QuickTest.Data.Wafer;
+using QuickTest.Data.Models.Wafers;
 using QuickTest.Infrastructure.Services;
 
 namespace QuickTest.Api.Endpoints.WaferPads;

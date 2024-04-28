@@ -1,9 +1,11 @@
 ﻿using Amazon.Runtime.Internal.Util;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using QuickTest.Data.Wafer;
 using ErrorOr;
 using MongoDB.Bson;
+using QuickTest.Data.Models.Measurements;
+using QuickTest.Data.Models.Wafers;
+using QuickTest.Data.Models.Wafers.Enums;
 using ILogger = Amazon.Runtime.Internal.Util.ILogger;
 
 namespace QuickTest.Infrastructure.Services;
@@ -28,7 +30,7 @@ public class WaferDataService {
         var check = await this.Exists(id: pad._id);
         return check ? pad : Error.Failure(description: "Failed to create wafer pad");
     }
-
+    
     public async Task<bool> Exists(string? identifier=default, ObjectId? id=default) {
         if (!string.IsNullOrEmpty(identifier)) {
             var check=await this._waferPadCollection.Find(e=>e.Identifier==identifier).FirstOrDefaultAsync();

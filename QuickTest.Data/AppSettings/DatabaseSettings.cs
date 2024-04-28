@@ -1,4 +1,4 @@
-﻿namespace QuickTest.Api.Data;
+﻿namespace QuickTest.Data.AppSettings;
 
 public class DatabaseSettings {
     public string DatabaseName { get; set; }

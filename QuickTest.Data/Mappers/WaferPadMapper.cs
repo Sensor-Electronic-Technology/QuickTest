@@ -1,8 +1,8 @@
 ﻿using FastEndpoints;
 using QuickTest.Data.Contracts.Responses;
 using QuickTest.Data.Dtos;
-using QuickTest.Data.Wafer;
-using QuickTest.Data.Wafer.Enums;
+using QuickTest.Data.Models.Wafers;
+using QuickTest.Data.Models.Wafers.Enums;
 
 namespace QuickTest.Data.Mappers;
 
@@ -11,7 +11,7 @@ public class WaferPadMapper:Mapper<CreateWaferPadRequest,WaferPadDto,WaferPad> {
         WaferPad pad = new WaferPad();
         pad.PadLocation = r.PadLocation;
         pad.PadNumber = r.PadNumber;
-        pad.SvgObject = r.SvgObject;
+        pad.SvgObject = r.PadMapDefinition;
         pad.WaferArea = r.WaferArea;
         pad.WaferSize = r.WaferSize;
         if (r.WaferArea.Value == WaferArea.Center) {
@@ -38,7 +38,7 @@ public class WaferPadMapper:Mapper<CreateWaferPadRequest,WaferPadDto,WaferPad> {
             e.Identifier = $"{r.PadLocation.Value}{r.PadNumber}-{r.WaferArea.Value}";
         }
         e.PadNumber = r.PadNumber;
-        e.SvgObject = r.SvgObject;
+        e.SvgObject = r.PadMapDefinition;
         e.WaferArea = r.WaferArea;
         e.WaferSize = r.WaferSize;
         e.PadLocation = r.PadLocation;

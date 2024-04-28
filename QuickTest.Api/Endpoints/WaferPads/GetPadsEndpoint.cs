@@ -1,6 +1,7 @@
 ﻿using FastEndpoints;
 using QuickTest.Data.Contracts.Requests;
-using QuickTest.Data.Wafer;
+using QuickTest.Data.Models.Wafers;
+using QuickTest.Data.Models.Wafers.Enums;
 using QuickTest.Infrastructure.Services;
 
 namespace QuickTest.Api.Endpoints.WaferPads;
@@ -15,17 +16,23 @@ public class GetPadsEndpoint : Endpoint<GetWaferPadsRequest, IEnumerable<WaferPa
     }
     
     public override void Configure() {
-        Get("/api/wafer_pads/{request}");
+        Get("/api/wafer_pads/{waferSize:int}");
         AllowAnonymous();
     }
     
     public override async Task HandleAsync(GetWaferPadsRequest request, CancellationToken cancellationToken) {
-        var pads = await this._waferDataService.GetWaferPads(request.WaferSize);
+        if (WaferSize.TryFromValue(request.WaferSize, out var waferSize)) {
+            var pads = await this._waferDataService.GetWaferPads(waferSize);
         if (pads != null) {
             await SendAsync(pads,cancellation: cancellationToken);
         }else {
             await SendNotFoundAsync(cancellationToken);
         }
+        } else {
+            AddError("Integer was out of range of WaferSize enum");
+            ThrowIfAnyErrors();
+        }
+
 
     }
 }

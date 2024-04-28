@@ -1,7 +1,5 @@
-﻿using QuickTest.Data.Wafer;
-
-namespace QuickTest.Data.Contracts.Requests;
+﻿namespace QuickTest.Data.Contracts.Requests;
 
 public class GetWaferPadsRequest {
-    public WaferSize WaferSize { get; set; }
+    public int WaferSize { get; set; }
 }

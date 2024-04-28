@@ -1,5 +1,5 @@
-﻿using QuickTest.Data.Wafer;
-using QuickTest.Data.Wafer.Enums;
+﻿using QuickTest.Data.Models.Wafers;
+using QuickTest.Data.Models.Wafers.Enums;
 
 namespace QuickTest.Data.Contracts.Responses;
 
@@ -8,6 +8,6 @@ public class WaferPadDto {
     public WaferSize? WaferSize { get; set; }
     public PadLocation? PadLocation { get; set; }
     public WaferArea? WaferArea { get; set; }
-    public SvgObject? SvgObject { get; set; }
+    public PadMapDefinition? SvgObject { get; set; }
     public int PadNumber { get; set; }
 }

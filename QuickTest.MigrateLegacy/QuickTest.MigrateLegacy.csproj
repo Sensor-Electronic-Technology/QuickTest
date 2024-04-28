@@ -17,6 +17,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\QuickTest.Data\QuickTest.Data.csproj" />
+      <ProjectReference Include="..\QuickTest.Infrastructure\QuickTest.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>
