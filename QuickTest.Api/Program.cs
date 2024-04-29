@@ -1,6 +1,7 @@
 using FastEndpoints;
 using MongoDB.Driver;
 using QuickTest.Api.Data;
+using QuickTest.Data.AppSettings;
 using QuickTest.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,8 @@ switch (hostType) {
                            "mongodb://172.20.3.41:27017";
         break;
 }
+
+builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection(nameof(DatabaseSettings)));
 builder.Services.AddSingleton<IMongoClient>(new MongoClient(connectionString));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
