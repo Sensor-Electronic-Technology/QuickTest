@@ -1,7 +1,8 @@
-﻿using QuickTest.Data.Models.Wafers;
+﻿using EpiData.Data.Models.Epi.Enums;
+using QuickTest.Data.Models.Wafers;
 using QuickTest.Data.Models.Wafers.Enums;
 
-namespace QuickTest.Data.Dtos;
+namespace QuickTest.Data.Contracts.Requests;
 
 public class CreateWaferPadRequest {
     public required WaferSize WaferSize { get; set; }

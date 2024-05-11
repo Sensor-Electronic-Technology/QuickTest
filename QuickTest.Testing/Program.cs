@@ -1,16 +1,78 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Net.Http.Json;
+using EpiData.Data.Contracts.Requests;
+using EpiData.Data.Models.Epi.Enums;
 using FastEndpoints;
 using QuickTest.Data.Contracts.Requests;
 using QuickTest.Data.Contracts.Responses;
-using QuickTest.Data.Dtos;
 using QuickTest.Data.Models.Wafers;
 using QuickTest.Data.Models.Wafers.Enums;
+using QuickTest.Infrastructure;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Kiota.Http.HttpClientLibrary;
+using QuickTest.Infrastructure.Services;
 
-await GetWaferPad();
+//await GetWaferPad();
 
 //await CreateWaferPads();
+
+//await TestClientGetWafer();
+
+/*await TestClientGetManyWafers();*/
+
+//TestFormatString();
+
+void TestFormatString() {
+    string format = "api/wafer/{waferId}";
+    
+    Console.WriteLine(format.Replace("waferIds","B01-4520-01"));
+}
+
+/*async Task TestClientGetWafer() {
+    var service = new EpiDataService();
+    var waferId = "B01-4520-01";
+    Console.WriteLine("Press any key to check if wafer exists...");
+    Console.ReadLine();
+    var wafer =await service.GetWaferById(waferId);
+    if(wafer == null) {
+        Console.WriteLine("Wafer does not exist");
+    } else {
+        Console.WriteLine($"Wafer exists: {wafer.TemplateId}");
+    }
+}
+
+async Task TestClientGetManyWafers() {
+    var service = new EpiDataService();
+    DateTime growthDate = new DateTime(2024, 1, 1);
+    
+    Console.WriteLine($"Press any key to get wafers since {growthDate.ToShortDateString()}...");
+    Console.ReadLine();
+    var waferList =await service.GetLedWafersSince(growthDate);
+    if(waferList == null) {
+        Console.WriteLine("Wafer does not exist");
+    } else {
+        foreach (var wafer in waferList) {
+            Console.WriteLine(wafer);
+        }
+    }
+}*/
+
+/*async Task TestClient() {
+    var httpClient = new HttpClient();
+    httpClient.BaseAddress = new Uri("http://localhost:5142/");
+    var clientAdapter=new HttpClientRequestAdapter(new AnonymousAuthenticationProvider(),httpClient:httpClient);
+    EpiDataClient client = new EpiDataClient(clientAdapter);
+    Console.WriteLine("Press any key to check if wafer exists...");
+    Console.ReadLine();
+    //var response=await client.Api.Wafer.Led.Exists["B01-4520-01"].GetAsync();
+    var response= await client.Api.Wafer.Led["B01-4520-01"].GetAsync();
+    if(response.LedWafer == null) {
+        Console.WriteLine("Wafer does not exist");
+    } else {
+        Console.WriteLine($"Wafer exists: {response.LedWafer.TemplateId}");
+    }
+}*/
 
 async Task GetWaferPad() {
     HttpClient client = new HttpClient();

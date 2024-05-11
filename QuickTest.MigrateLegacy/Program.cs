@@ -183,7 +183,7 @@ async Task GetInitialResults() {
     }
 }
 
-async Task GetWaferListV2() {
+/*async Task GetWaferListV2() {
     Stopwatch stopwatch = new();
     var clientWork=new MongoClient("mongodb://172.20.3.41:27017");
     var database=clientWork.GetDatabase("quick_test_db");
@@ -222,8 +222,8 @@ async Task GetWaferListV2() {
         Console.WriteLine($"Updated Wafer: {wafer.WaferId} Count: {count}");
     }
     /*stopwatch.Stop();
-    Console.WriteLine($"Wafer Count: {waferList.Count()} Elapsed: {(double)stopwatch.ElapsedMilliseconds/1000}");*/
-}
+    Console.WriteLine($"Wafer Count: {waferList.Count()} Elapsed: {(double)stopwatch.ElapsedMilliseconds/1000}");#1#
+}*/
 
 async Task GetWaferListV1() {
     Stopwatch stopwatch = new();
@@ -236,14 +236,14 @@ async Task GetWaferListV1() {
     Console.WriteLine($"Wafer Count: {waferList.Count()} Elapsed: {(double)stopwatch.ElapsedMilliseconds/1000}");
 }
 
-async Task CreateWaferList() {
+/*async Task CreateWaferList() {
     var clientWork=new MongoClient("mongodb://172.20.3.41:27017");
     var database=clientWork.GetDatabase("quick_test_db");
     var qtCollection=database.GetCollection<QuickTestResult>("quick_test");
     var waferCollection=database.GetCollection<Wafer>("wafers");
     var waferList=await qtCollection.Find(e=>e.WaferId!=null).Project(e=>e.WaferId).ToListAsync();
     await waferCollection.InsertManyAsync(waferList.Select(e=>new Wafer(){WaferId = e ?? "not set"}));
-}
+}*/
 
 async Task Migrate() {
     var context = new EpiContext();

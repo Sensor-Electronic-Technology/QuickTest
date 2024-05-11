@@ -1,6 +1,17 @@
 @QuickTest.Api_HostAddress = http://localhost:5260
 
-GET {{QuickTest.Api_HostAddress}}/weatherforecast/
+### GET request to get initial data
+GET {{QuickTest.Api_HostAddress}}/api/qt_results/B03-2615-07
+Accept: text/plain
+
+### GET request to get initial data
+GET {{QuickTest.Api_HostAddress}}/api/initial/results/B03-2615-07,B03-2615-07
 Accept: application/json
 
-###
+### GET request to get all wafer pads
+GET {{QuickTest.Api_HostAddress}}/api/wafer_pads/2
+Accept: application/json
+
+### GET request to get all wafer pads
+GET {{QuickTest.Api_HostAddress}}/api/map/2
+Accept: application/json

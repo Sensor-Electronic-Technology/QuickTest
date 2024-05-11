@@ -1,8 +1,9 @@
 ﻿using ErrorOr;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
+using QuickTest.Data.Constants;
+using QuickTest.Data.Contracts.Requests;
 using QuickTest.Data.Contracts.Responses;
-using QuickTest.Data.Dtos;
 using QuickTest.Data.Mappers;
 using QuickTest.Data.Models.Wafers;
 using QuickTest.Infrastructure.Services;
@@ -20,7 +21,7 @@ public class CreateWaferPadEndpoint:Endpoint<CreateWaferPadRequest,WaferPadDto,W
     }
     
     public override void Configure() {
-        Post("/api/wafer_pads/create");
+        Post(QtApiPaths.CreateWaferPadPath+"{waferPad}");
         AllowAnonymous();
     }
     

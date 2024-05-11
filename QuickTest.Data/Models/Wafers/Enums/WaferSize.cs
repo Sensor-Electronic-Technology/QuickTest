@@ -4,7 +4,7 @@ namespace QuickTest.Data.Models.Wafers.Enums;
 
 
 
-public class WaferSize : SmartEnum<WaferSize, int> {
+/*public class WaferSize : SmartEnum<WaferSize, int> {
     public static WaferSize TwoInch = new WaferSize("2Inch",2);
     public static WaferSize FourInch = new WaferSize("4Inch",4);
     public static WaferSize SixInch = new WaferSize("6Inch",6);
@@ -13,5 +13,5 @@ public class WaferSize : SmartEnum<WaferSize, int> {
     public static WaferSize TwelveInch = new WaferSize("12Inch",12);
 
     public WaferSize(String name, int value) : base(name, value) { }
-}
+}*/
 

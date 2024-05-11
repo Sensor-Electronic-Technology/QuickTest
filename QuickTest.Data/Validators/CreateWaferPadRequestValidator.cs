@@ -1,6 +1,7 @@
-﻿using FastEndpoints;
+﻿using EpiData.Data.Models.Epi.Enums;
+using FastEndpoints;
 using FluentValidation;
-using QuickTest.Data.Dtos;
+using QuickTest.Data.Contracts.Requests;
 using QuickTest.Data.Models.Wafers.Enums;
 
 namespace QuickTest.Data.Validators;

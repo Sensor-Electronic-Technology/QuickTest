@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using EpiData.Data.Models.Epi.Enums;
+using MongoDB.Bson;
 using QuickTest.Data.Models.Wafers.Enums;
 
 namespace QuickTest.Data.Models.Wafers;
@@ -24,10 +25,3 @@ public class WaferPad {
         this.Identifier = $"{location.Value}-{area.Value}-{padNumber}";
     }
 }
-
-public class PadMapDefinition {
-     public int X { get; set; }
-     public int Y { get; set; }
-     public int Radius { get; set; }
-}
-

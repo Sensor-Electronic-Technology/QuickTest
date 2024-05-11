@@ -1,4 +1,5 @@
-﻿using QuickTest.Data.Models.Wafers;
+﻿using EpiData.Data.Models.Epi.Enums;
+using QuickTest.Data.Models.Wafers;
 using QuickTest.Data.Models.Wafers.Enums;
 
 namespace QuickTest.Data.Contracts.Responses;

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -41,10 +42,10 @@ public class QuickTestDataService {
             .FirstOrDefaultAsync();
         if(qt==null) {
             StringBuilder builder = new StringBuilder();
-            builder.AppendFormat($"TimeStamp");
+            /*builder.AppendFormat($"TimeStamp");
             foreach (var pad in PadLocation.List.Select(e => e.Value)) {
                 builder.AppendFormat($"\t{pad}_Voltage\t{pad}_Power\t{pad}_Wl\t{pad}_Ir\t{pad}_Knee");
-            }
+            }*/
             double zero = 0.00;
             foreach (var pad in PadLocation.List.Select(e => e.Value)) {
                 builder.AppendFormat($"\t{zero}\t{zero}\t{zero}\t{zero}\t{zero}");
@@ -55,13 +56,6 @@ public class QuickTestDataService {
         var initMeasurements = await this._initMeasureCollection.Find(e => e.QuickTestResultId==qt._id).ToListAsync();
         if (initMeasurements.Any()) {
             StringBuilder builder = new StringBuilder();
-
-            builder.AppendFormat($"TimeStamp");
-            foreach (var pad in PadLocation.List.Select(e => e.Value)) {
-                builder.AppendFormat($"\t{pad}_Voltage\t{pad}_Power\t{pad}_Wl\t{pad}_Ir\t{pad}_Knee");
-            }
-
-            builder.AppendLine();
             builder.AppendFormat($"{qt.InitialTimeStamp}");
             foreach (var pad in PadLocation.List.Select(e => e.Value)) {
                 var measurement = initMeasurements.FirstOrDefault(e => e.Pad != null && e.Pad.Contains(pad));
@@ -79,15 +73,77 @@ public class QuickTestDataService {
             return builder.ToString();
         } else {
             StringBuilder builder = new StringBuilder();
-            builder.AppendFormat($"TimeStamp");
-            foreach (var pad in PadLocation.List.Select(e => e.Value)) {
-                builder.AppendFormat($"\t{pad}_Voltage\t{pad}_Power\t{pad}_Wl\t{pad}_Ir\t{pad}_Knee");
-            }
             double zero = 0.00;
             foreach (var pad in PadLocation.List.Select(e => e.Value)) {
                 builder.AppendFormat($"\t{zero}\t{zero}\t{zero}\t{zero}\t{zero}");
             }
             return builder.ToString();
+        }
+    }
+
+
+    public async Task<List<List<string>>> GetInitialResults(List<string> waferIds) {
+        List<List<string>> rows = new List<List<string>>();
+        foreach (var waferId in waferIds) {
+            var row=await this.GetInitialResultsV2(waferId);
+            rows.Add(row);
+        }
+
+        return rows;
+    }
+    
+    public async Task<List<string>> GetInitialResultsV2(string waferId) {
+        var qt = await this._qtCollection.Find(e => e.WaferId == waferId)
+            .FirstOrDefaultAsync();
+        List<string> values = new List<string>();
+        if(qt==null) {
+            double zero = 0.00;
+            values.Add("");
+            foreach (var pad in PadLocation.List.Select(e => e.Value)) {
+                values.AddRange([zero.ToString(CultureInfo.InvariantCulture),
+                    zero.ToString(CultureInfo.InvariantCulture),
+                    zero.ToString(CultureInfo.InvariantCulture),
+                    zero.ToString(CultureInfo.InvariantCulture),
+                    zero.ToString(CultureInfo.InvariantCulture)]);
+            }
+            Console.WriteLine($"WaferId {waferId} not found in database. Returning empty.");
+            return values;
+        }
+        var initMeasurements = await this._initMeasureCollection.Find(e => e.QuickTestResultId==qt._id).ToListAsync();
+        if (initMeasurements.Any()) {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendFormat($"{qt.InitialTimeStamp}");
+            values.Add(qt.InitialTimeStamp.ToString(CultureInfo.InvariantCulture));
+            foreach (var pad in PadLocation.List.Select(e => e.Value)) {
+                var measurement = initMeasurements.FirstOrDefault(e => e.Pad != null && e.Pad.Contains(pad));
+                if (measurement != null) {
+                    values.AddRange([Math.Round(measurement.Wl, 2).ToString(CultureInfo.InvariantCulture),
+                                     Math.Round(measurement.Power, 2).ToString(CultureInfo.InvariantCulture),
+                                     Math.Round(measurement.Voltage, 2).ToString(CultureInfo.InvariantCulture),
+                                     measurement.Knee.ToString(CultureInfo.InvariantCulture),
+                                     measurement.Ir.ToString(CultureInfo.InvariantCulture)]);
+                } else {
+                    double zero = 0.00;
+                    values.AddRange([zero.ToString(CultureInfo.InvariantCulture),
+                                     zero.ToString(CultureInfo.InvariantCulture),
+                                     zero.ToString(CultureInfo.InvariantCulture),
+                                     zero.ToString(CultureInfo.InvariantCulture),
+                                     zero.ToString(CultureInfo.InvariantCulture)]);
+                }
+            }
+            return values;
+        } else {
+            StringBuilder builder = new StringBuilder();
+            double zero = 0.00;
+            values.Add("");
+            foreach (var pad in PadLocation.List.Select(e => e.Value)) {
+                values.AddRange([zero.ToString(CultureInfo.InvariantCulture),
+                    zero.ToString(CultureInfo.InvariantCulture),
+                    zero.ToString(CultureInfo.InvariantCulture),
+                    zero.ToString(CultureInfo.InvariantCulture),
+                    zero.ToString(CultureInfo.InvariantCulture)]);
+            }
+            return values;
         }
     }
         

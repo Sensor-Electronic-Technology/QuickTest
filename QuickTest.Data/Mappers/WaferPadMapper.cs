@@ -1,6 +1,7 @@
-﻿using FastEndpoints;
+﻿using EpiData.Data.Models.Epi.Enums;
+using FastEndpoints;
+using QuickTest.Data.Contracts.Requests;
 using QuickTest.Data.Contracts.Responses;
-using QuickTest.Data.Dtos;
 using QuickTest.Data.Models.Wafers;
 using QuickTest.Data.Models.Wafers.Enums;
 

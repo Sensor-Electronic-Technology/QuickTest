@@ -24,14 +24,14 @@ $newversionNumber = $major.ToString() + "." + $minor.ToString() + "." + $patch.T
 $outputPath="C:/Users/aelmendo/RiderProjects/QuickTest/QuickTest.Data/bin/Release/QuickTest.Data." + $newversionNumber + ".nupkg"
 $csprojcontents.Project.PropertyGroup.Version = $newversionNumber
 $csprojcontents.Save($csprojfilename)
-dotnet pack $csprojfilename --configuration Release 
-<#dotnet nuget push $outputPath --source "github" #>
+dotnet pack $csprojfilename --configuration Release
+<#Push Local Server#>
 dotnet nuget push -s http://172.20.4.15:8081/v3/index.json $outputPath
+<#Push Github#>
+$json = dotnet user-secrets list --json
+$secrets = $json | % { $_ -replace '//(BEGIN|END)' } | ConvertFrom-Json
+dotnet nuget push $outputPath --api-key $secrets.'GithubPackage:Token' --source "github"
 
 
 
-<# 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
-# "bin/Release/QuickTest.Data.1.0.2.nupkg" 
-# $csprojcontents.Project.PropertyGroup.Version = $Env:BUILD_BUILDNUMBER #>
-<# $csprojcontents.Save($csprojfilename) #>
-<# "Version number has been udated from " + $oldversionNumber + " to " + $Env:BUILD_BUILDNUMBER #>
+

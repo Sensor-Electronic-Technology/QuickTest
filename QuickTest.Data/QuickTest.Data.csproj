@@ -4,18 +4,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>QuickTest.Data</PackageId>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
     <Authors>Andrew Elmendorf</Authors>
     <Company>Sensor Electronic Technology</Company>
     <PackageDescription>Data for QuickTest</PackageDescription>
     <RepositoryUrl>https://github.com/Sensor-Electronic-Technology/QuickTest</RepositoryUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <UserSecretsId>53a8c4e8-45c7-432b-b51d-fddb49c32ea7</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Ardalis.SmartEnum" Version="8.0.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.25.0" />
-    <PackageReference Include="FastEndpoints" Version="5.24.0" />
+    <PackageReference Include="FastEndpoints" Version="5.25.0" />
+    <PackageReference Include="EpiData.Data" Version="1.0.4" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />

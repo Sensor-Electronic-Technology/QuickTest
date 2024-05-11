@@ -1,5 +1,23 @@
-﻿namespace QuickTest.Api.Endpoints.WaferPads;
+﻿using FastEndpoints;
+using QuickTest.Data.Constants;
+using QuickTest.Data.Contracts.Requests;
+using QuickTest.Data.Contracts.Responses;
+using QuickTest.Infrastructure.Services;
 
-public class GetAvailableBurnInPadsEndpoint {
+namespace QuickTest.Api.Endpoints.WaferPads;
+
+public class GetAvailableBurnInPadsEndpoint:Endpoint<GetAvailableBurnInPadsRequest,GetAvailableBurnInPadsResponse> {
+    private readonly WaferDataService _waferDataService;
+    public GetAvailableBurnInPadsEndpoint(WaferDataService waferDataService) {
+        this._waferDataService = waferDataService;
+    }
     
+    public override void Configure() {
+        Get(QtApiPaths.GetAvailableBurnInPadsPath+"{waferId}");
+        AllowAnonymous();
+    }
+    public override Task HandleAsync(GetAvailableBurnInPadsRequest req, CancellationToken ct) {
+        //var pads = _waferDataService.GetAvailableBurnInPads();
+        return base.HandleAsync(req, ct);
+    }
 }
