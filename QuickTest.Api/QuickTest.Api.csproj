@@ -23,6 +23,8 @@
     <ItemGroup>
       <Folder Include="Contracts\Requests\" />
       <Folder Include="Contracts\Responces\" />
+      <Folder Include="Endpoints\WaferPads\Push\" />
+      <Folder Include="Endpoints\WaferPads\Put\" />
     </ItemGroup>
 
     <ItemGroup>

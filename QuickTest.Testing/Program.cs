@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using EpiData.Data.Contracts.Requests;
 using EpiData.Data.Models.Epi.Enums;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
 using QuickTest.Data.Contracts.Requests;
 using QuickTest.Data.Contracts.Responses;
 using QuickTest.Data.Models.Wafers;
@@ -11,6 +12,9 @@ using QuickTest.Data.Models.Wafers.Enums;
 using QuickTest.Infrastructure;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
+using QuickTest.Data.Contracts.Requests.Get.Results;
+using QuickTest.Data.Contracts.Requests.Post;
+using QuickTest.Data.Contracts.Responses.Get.Excel;
 using QuickTest.Infrastructure.Services;
 
 //await GetWaferPad();
@@ -23,10 +27,27 @@ using QuickTest.Infrastructure.Services;
 
 //TestFormatString();
 
+await TestQuickTest();
+
 void TestFormatString() {
     string format = "api/wafer/{waferId}";
     
     Console.WriteLine(format.Replace("waferIds","B01-4520-01"));
+}
+
+async Task TestQuickTest() {
+    HttpClient client = new HttpClient();
+    client.BaseAddress = new Uri("http://172.20.4.206");
+    GetInitialRequest request = new GetInitialRequest() {
+        WaferId = "B03-2615-07"
+    };
+    
+    var response=await client.GetAsync($"/api/results/initial/B03-2615-07");
+    Console.WriteLine(response.ToString());
+    Console.Write(response.Content.ToString());
+    Console.WriteLine(response.Headers.ToString());
+    Console.WriteLine(response.RequestMessage?.ToString());
+    
 }
 
 /*async Task TestClientGetWafer() {

@@ -2,6 +2,7 @@
 using FastEndpoints;
 using FluentValidation;
 using QuickTest.Data.Contracts.Requests;
+using QuickTest.Data.Contracts.Requests.Post;
 using QuickTest.Data.Models.Wafers.Enums;
 
 namespace QuickTest.Data.Validators;

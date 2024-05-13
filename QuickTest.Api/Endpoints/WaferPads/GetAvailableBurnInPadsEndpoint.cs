@@ -1,7 +1,9 @@
 ﻿using FastEndpoints;
 using QuickTest.Data.Constants;
 using QuickTest.Data.Contracts.Requests;
+using QuickTest.Data.Contracts.Requests.Get;
 using QuickTest.Data.Contracts.Responses;
+using QuickTest.Data.Contracts.Responses.Get;
 using QuickTest.Infrastructure.Services;
 
 namespace QuickTest.Api.Endpoints.WaferPads;

@@ -3,14 +3,16 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 using QuickTest.Data.Constants;
 using QuickTest.Data.Contracts.Requests;
+using QuickTest.Data.Contracts.Requests.Post;
 using QuickTest.Data.Contracts.Responses;
+using QuickTest.Data.Contracts.Responses.Post;
 using QuickTest.Data.Mappers;
 using QuickTest.Data.Models.Wafers;
 using QuickTest.Infrastructure.Services;
 
 namespace QuickTest.Api.Endpoints.WaferPads;
 
-public class CreateWaferPadEndpoint:Endpoint<CreateWaferPadRequest,WaferPadDto,WaferPadMapper>{
+public class CreateWaferPadEndpoint:Endpoint<CreateWaferPadRequest,CreateWaferPadResponse,WaferPadMapper>{
     private readonly WaferDataService _waferDataService;
     private readonly ILogger<CreateWaferPadEndpoint> _logger;
     

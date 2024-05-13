@@ -5,6 +5,10 @@ GET {{QuickTest.Api_HostAddress}}/api/qt_results/B03-2615-07
 Accept: text/plain
 
 ### GET request to get initial data
+GET http://172.20.4.206/api/results/initial/B03-2615-07
+Accept: text/plain
+
+### GET request to get initial data
 GET {{QuickTest.Api_HostAddress}}/api/initial/results/B03-2615-07,B03-2615-07
 Accept: application/json
 

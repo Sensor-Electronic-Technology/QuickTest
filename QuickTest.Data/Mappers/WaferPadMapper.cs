@@ -1,13 +1,13 @@
 ﻿using EpiData.Data.Models.Epi.Enums;
 using FastEndpoints;
-using QuickTest.Data.Contracts.Requests;
+using QuickTest.Data.Contracts.Requests.Post;
 using QuickTest.Data.Contracts.Responses;
+using QuickTest.Data.Contracts.Responses.Post;
 using QuickTest.Data.Models.Wafers;
-using QuickTest.Data.Models.Wafers.Enums;
 
 namespace QuickTest.Data.Mappers;
 
-public class WaferPadMapper:Mapper<CreateWaferPadRequest,WaferPadDto,WaferPad> {
+public class WaferPadMapper:Mapper<CreateWaferPadRequest,CreateWaferPadResponse,WaferPad> {
     public override WaferPad ToEntity(CreateWaferPadRequest r) {
         WaferPad pad = new WaferPad();
         pad.PadLocation = r.PadLocation;
@@ -23,13 +23,15 @@ public class WaferPadMapper:Mapper<CreateWaferPadRequest,WaferPadDto,WaferPad> {
         return pad;
     }
 
-    public override WaferPadDto FromEntity(WaferPad entity)=> new() {
-        Identifier = entity.Identifier,
-        PadNumber = entity.PadNumber,
-        SvgObject = entity.SvgObject,
-        WaferArea = entity.WaferArea,
-        WaferSize = entity.WaferSize,
-        PadLocation = entity.PadLocation
+    public override CreateWaferPadResponse FromEntity(WaferPad entity)=> new() {
+        WaferPad = new WaferPadDto(){
+            Identifier = entity.Identifier,
+            PadNumber = entity.PadNumber,
+            SvgObject = entity.SvgObject,
+            WaferArea = entity.WaferArea,
+            WaferSize = entity.WaferSize,
+            PadLocation = entity.PadLocation
+        }
     };
 
     public override WaferPad UpdateEntity(CreateWaferPadRequest r, WaferPad e) {
