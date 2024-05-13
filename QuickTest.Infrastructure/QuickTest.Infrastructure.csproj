@@ -23,5 +23,4 @@
     <ItemGroup>
       <ProjectReference Include="..\QuickTest.Data\QuickTest.Data.csproj" />
     </ItemGroup>
-
 </Project>

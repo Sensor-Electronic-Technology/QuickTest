@@ -1,7 +1,4 @@
-﻿using FastEndpoints;
-using QuickTest.Data.Contracts.Requests;
-
-namespace QuickTest.Api.Endpoints.WaferPads;
+﻿namespace QuickTest.Api.Endpoints.Get;
 
 /*public class WaferExistsEndpoint:Endpoint<WaferExistsRequest,WaferExistsRequest> {
     

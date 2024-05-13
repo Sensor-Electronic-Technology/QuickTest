@@ -21,15 +21,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Contracts\Requests\" />
-      <Folder Include="Contracts\Responces\" />
-      <Folder Include="Endpoints\WaferPads\Push\" />
-      <Folder Include="Endpoints\WaferPads\Put\" />
+      <ProjectReference Include="..\QuickTest.Data\QuickTest.Data.csproj" />
+      <ProjectReference Include="..\QuickTest.Infrastructure\QuickTest.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\QuickTest.Data\QuickTest.Data.csproj" />
-      <ProjectReference Include="..\QuickTest.Infrastructure\QuickTest.Infrastructure.csproj" />
+      <Folder Include="Endpoints\Push\" />
     </ItemGroup>
 
 </Project>

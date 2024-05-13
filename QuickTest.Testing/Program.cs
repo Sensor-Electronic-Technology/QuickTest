@@ -38,7 +38,7 @@ void TestFormatString() {
 async Task TestQuickTest() {
     HttpClient client = new HttpClient();
     client.BaseAddress = new Uri("http://172.20.4.206");
-    GetInitialRequest request = new GetInitialRequest() {
+    GetInitialExcelResultsRequest excelResultsRequest = new GetInitialExcelResultsRequest() {
         WaferId = "B03-2615-07"
     };
     

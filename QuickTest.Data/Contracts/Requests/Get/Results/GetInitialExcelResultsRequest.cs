@@ -1,5 +1,5 @@
 ﻿namespace QuickTest.Data.Contracts.Requests.Get.Results;
 
-public class GetManyFinalRequest {
+public class GetInitialExcelResultsRequest {
     public string? WaferId { get; set; }
 }
