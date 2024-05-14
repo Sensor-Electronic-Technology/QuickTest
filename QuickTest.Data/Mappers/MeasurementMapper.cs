@@ -36,12 +36,14 @@ public class MeasurementMapper:Mapper<InsertMeasurementRequest,InsertMeasurement
             return null;
         }
         measurement.WaferId = r.Measurement.WaferId;
-        if (MeasurementType.TryFromValue(r.Measurement.MeasurementType,out var type)) {
+        measurement.MeasurementType = (MeasurementType)r.Measurement.MeasurementType;
+        return measurement;
+        /*if (MeasurementType.TryFromValue(r.Measurement.MeasurementType,out var type)) {
             measurement.MeasurementType = type;
             return measurement;
         } else {
             return null;
-        }
+        }*/
     }
 
     public override Measurement? UpdateEntity(InsertMeasurementRequest r, Measurement? e) {
@@ -62,11 +64,13 @@ public class MeasurementMapper:Mapper<InsertMeasurementRequest,InsertMeasurement
             return null;
         }
         e.WaferId = r.Measurement.WaferId;
-        if (MeasurementType.TryFromValue(r.Measurement.MeasurementType,out var type)) {
+        e.MeasurementType= (MeasurementType)r.Measurement.MeasurementType;
+        return e;
+        /*if (MeasurementType.TryFromValue(r.Measurement.MeasurementType,out var type)) {
             e.MeasurementType = type;
             return e;
         } else {
             return null;
-        }
+        }*/
     }
 }

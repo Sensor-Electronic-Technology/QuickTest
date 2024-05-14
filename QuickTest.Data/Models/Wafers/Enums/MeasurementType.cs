@@ -2,14 +2,14 @@
 namespace QuickTest.Data.Models.Wafers.Enums;
 
 
-/*public enum MeasurementType:int {
+public enum MeasurementType:int {
     Final=1,
     Initial=0
-}*/
+}
 
 
-public class MeasurementType : SmartEnum<MeasurementType, int> {
-    public static MeasurementType Initial  = new MeasurementType(nameof(Initial), 0);
-    public static MeasurementType Final  = new MeasurementType(nameof(Final), 0);
-    public MeasurementType(String name, int value) : base(name, value) { }
+public class MeasurementTypeSmart : SmartEnum<MeasurementTypeSmart, int> {
+    public static MeasurementTypeSmart Initial  = new MeasurementTypeSmart(nameof(Initial), 0);
+    public static MeasurementTypeSmart Final  = new MeasurementTypeSmart(nameof(Final), 0);
+    public MeasurementTypeSmart(String name, int value) : base(name, value) { }
 }
