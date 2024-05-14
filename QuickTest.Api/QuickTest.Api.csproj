@@ -25,8 +25,4 @@
       <ProjectReference Include="..\QuickTest.Infrastructure\QuickTest.Infrastructure.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Endpoints\Push\" />
-    </ItemGroup>
-
 </Project>

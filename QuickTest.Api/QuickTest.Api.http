@@ -5,7 +5,7 @@ GET {{QuickTest.Api_HostAddress}}/api/qt_results/B03-2615-07
 Accept: text/plain
 
 ### GET request to get initial data
-GET http://172.20.4.206/api/results/initial/B03-2615-07
+GET http://172.20.4.206/api/results/initial/excel/12-1594
 Accept: text/plain
 
 ### GET request to get initial data

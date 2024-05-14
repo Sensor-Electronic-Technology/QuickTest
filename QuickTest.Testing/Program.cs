@@ -1,21 +1,11 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Net.Http.Json;
-using EpiData.Data.Contracts.Requests;
 using EpiData.Data.Models.Epi.Enums;
-using FastEndpoints;
-using Microsoft.AspNetCore.Http;
-using QuickTest.Data.Contracts.Requests;
 using QuickTest.Data.Contracts.Responses;
 using QuickTest.Data.Models.Wafers;
 using QuickTest.Data.Models.Wafers.Enums;
-using QuickTest.Infrastructure;
-using Microsoft.Kiota.Abstractions.Authentication;
-using Microsoft.Kiota.Http.HttpClientLibrary;
-using QuickTest.Data.Contracts.Requests.Get.Results;
 using QuickTest.Data.Contracts.Requests.Post;
-using QuickTest.Data.Contracts.Responses.Get.Excel;
-using QuickTest.Infrastructure.Services;
 
 //await GetWaferPad();
 
@@ -27,7 +17,7 @@ using QuickTest.Infrastructure.Services;
 
 //TestFormatString();
 
-await TestQuickTest();
+//await TestQuickTest();
 
 void TestFormatString() {
     string format = "api/wafer/{waferId}";
@@ -35,7 +25,7 @@ void TestFormatString() {
     Console.WriteLine(format.Replace("waferIds","B01-4520-01"));
 }
 
-async Task TestQuickTest() {
+/*async Task TestQuickTest() {
     HttpClient client = new HttpClient();
     client.BaseAddress = new Uri("http://172.20.4.206");
     GetInitialExcelResultsRequest excelResultsRequest = new GetInitialExcelResultsRequest() {
@@ -48,7 +38,7 @@ async Task TestQuickTest() {
     Console.WriteLine(response.Headers.ToString());
     Console.WriteLine(response.RequestMessage?.ToString());
     
-}
+}*/
 
 /*async Task TestClientGetWafer() {
     var service = new EpiDataService();
