@@ -15,6 +15,7 @@ public static class QtApiPaths {
         public static string GetFinalExcelResultsPath => "/api/results/final/excel/";
         public static string GetManyInitialExcelResultsPath => "/api/results/initial/excel/many";
         public static string GetManyFinalExcelResultsPath => "/api/results/final/excel/many";
+        public static string GetQuickTestExistsPath => "/api/quick-test/exists/";
     #endregion
 
     #region InsertMeasurementsPaths

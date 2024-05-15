@@ -1,5 +1,5 @@
 ﻿namespace QuickTest.Data.Contracts.Requests;
 
-public class WaferExistsRequest {
+public class QtWaferExistsRequest {
     public string? WaferId { get; set; }
 }
