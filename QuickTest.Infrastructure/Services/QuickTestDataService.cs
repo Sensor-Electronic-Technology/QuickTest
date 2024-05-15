@@ -92,33 +92,17 @@ public class QuickTestDataService {
         }
         if (measurements.Any()) {
             values.Add(qt.InitialTimeStamp.ToString(CultureInfo.InvariantCulture));
-            foreach (var pad in PadLocation.List.Select(e => e.Value)) {
-                var padMeasurements = measurements.Where(e => e.Pad != null && e.Pad.Contains(pad)).ToArray();
-                Measurement? measurement=null;
-                if (padMeasurements.Any()) {
-                    if(padMeasurements.Count()>1) {
-                        measurement=padMeasurements.OrderBy(e => e._id).First();
-                    } else {
-                        measurement=padMeasurements.First();
-                    }
-                } else {
-                    measurement = null;
-                }
-                if (measurement != null) {
-                    values.AddRange([Math.Round(measurement.Wl, 2).ToString(CultureInfo.InvariantCulture),
-                                     Math.Round(measurement.Power, 2).ToString(CultureInfo.InvariantCulture),
-                                     Math.Round(measurement.Voltage, 2).ToString(CultureInfo.InvariantCulture),
-                                     measurement.Knee.ToString(CultureInfo.InvariantCulture),
-                                     measurement.Ir.ToString(CultureInfo.InvariantCulture)]);
-                } else {
-                    double zero = 0.00;
-                    values.AddRange([zero.ToString(CultureInfo.InvariantCulture),
-                                     zero.ToString(CultureInfo.InvariantCulture),
-                                     zero.ToString(CultureInfo.InvariantCulture),
-                                     zero.ToString(CultureInfo.InvariantCulture),
-                                     zero.ToString(CultureInfo.InvariantCulture)]);
-                }
-            }
+            GetPadMeasurement(measurements,PadLocation.PadLocationA.Value,values);
+            GetPadMeasurement(measurements,PadLocation.PadLocationB.Value,values);
+            GetPadMeasurement(measurements,PadLocation.PadLocationC.Value,values);
+            GetPadMeasurement(measurements,PadLocation.PadLocationD.Value,values);
+            GetPadMeasurement(measurements,PadLocation.PadLocationR.Value,values);
+            GetPadMeasurement(measurements,PadLocation.PadLocationT.Value,values);
+            GetPadMeasurement(measurements,PadLocation.PadLocationL.Value,values);
+            GetPadMeasurement(measurements,PadLocation.PadLocationG.Value,values);
+            /*foreach (var pad in PadLocation.List.Select(e => e.Value)) {
+                GetPadMeasurement(measurements, pad, values);
+            }*/
             return values;
         } else {
             double zero = 0.00;
@@ -132,7 +116,35 @@ public class QuickTestDataService {
             return values;
         }
     }
-    
+
+    private static void GetPadMeasurement(List<Measurement> measurements, string pad, List<string> values) {
+        var padMeasurements = measurements.Where(e => e.Pad != null && e.Pad.Contains(pad)).ToArray();
+        Measurement? measurement=null;
+        if (padMeasurements.Any()) {
+            if(padMeasurements.Count()>1) {
+                measurement=padMeasurements.OrderBy(e => e._id).First();
+            } else {
+                measurement=padMeasurements.First();
+            }
+        } else {
+            measurement = null;
+        }
+        if (measurement != null) {
+            values.AddRange([Math.Round(measurement.Wl, 2).ToString(CultureInfo.InvariantCulture),
+                Math.Round(measurement.Power, 2).ToString(CultureInfo.InvariantCulture),
+                Math.Round(measurement.Voltage, 2).ToString(CultureInfo.InvariantCulture),
+                measurement.Knee.ToString(CultureInfo.InvariantCulture),
+                measurement.Ir.ToString(CultureInfo.InvariantCulture)]);
+        } else {
+            double zero = 0.00;
+            values.AddRange([zero.ToString(CultureInfo.InvariantCulture),
+                zero.ToString(CultureInfo.InvariantCulture),
+                zero.ToString(CultureInfo.InvariantCulture),
+                zero.ToString(CultureInfo.InvariantCulture),
+                zero.ToString(CultureInfo.InvariantCulture)]);
+        }
+    }
+
     public Task<List<string>> GetWaferList() {
         return this._qtCollection.Find(e=>e.WaferId!=null).Project(e=>e.WaferId).ToListAsync();
     }
