@@ -4,6 +4,7 @@ on:
     branches: [ "master" ]
     paths:
     - 'QuickTest.Api/**'
+    - 'QuickTest.Infrastructure/**'
     - '.github/workflows/api-release.yml'
 jobs:
   build:
