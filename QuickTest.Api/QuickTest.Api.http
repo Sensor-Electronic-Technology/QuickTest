@@ -5,15 +5,15 @@ GET {{QuickTest.Api_HostAddress}}/api/qt_results/B03-2615-07
 Accept: text/plain
 
 ### GET request to get initial data
-GET http://172.20.4.206/api/results/all/excel/B03-2615-07
+GET http://172.20.4.206/api/results/all/excel/B03-2615-07/1
 Accept: text/plain
 
 ### GET request to get initial data
-GET {{QuickTest.Api_HostAddress}}/api/results/all/excel/B03-2615-07
+GET {{QuickTest.Api_HostAddress}}/api/results/all/excel/B01-3766-06
 Accept: text/plain
 
 ### GET request to get initial data
-GET http://172.20.4.206/api/results/final/excel/B04-1242-09
+GET http://172.20.4.206/api/results/final/excel/B01-3766-06
 Accept: application/json
 
 ### GET request to get all wafer pads

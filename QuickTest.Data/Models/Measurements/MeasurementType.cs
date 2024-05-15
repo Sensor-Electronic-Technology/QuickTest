@@ -1,5 +1,6 @@
 ﻿using Ardalis.SmartEnum;
-namespace QuickTest.Data.Models.Wafers.Enums;
+
+namespace QuickTest.Data.Models.Measurements;
 
 
 public enum MeasurementType:int {

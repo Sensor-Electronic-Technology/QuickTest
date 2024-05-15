@@ -1,12 +1,10 @@
 ﻿using EpiData.Data.Models.Epi.Enums;
 using FastEndpoints;
-using QuickTest.Data.Contracts.Requests;
 using QuickTest.Data.Contracts.Requests.Get;
 using QuickTest.Data.Models.Wafers;
-using QuickTest.Data.Models.Wafers.Enums;
 using QuickTest.Infrastructure.Services;
 
-namespace QuickTest.Api.Endpoints.WaferPads;
+namespace QuickTest.Api.Endpoints.Get;
 
 public class GetWaferPadsEndpoint : Endpoint<GetWaferPadsRequest, IEnumerable<WaferPad>> {
     private readonly WaferDataService _waferDataService;

@@ -1,16 +1,12 @@
-﻿using ErrorOr;
-using FastEndpoints;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using FastEndpoints;
 using QuickTest.Data.Constants;
-using QuickTest.Data.Contracts.Requests;
 using QuickTest.Data.Contracts.Requests.Post;
-using QuickTest.Data.Contracts.Responses;
 using QuickTest.Data.Contracts.Responses.Post;
 using QuickTest.Data.Mappers;
 using QuickTest.Data.Models.Wafers;
 using QuickTest.Infrastructure.Services;
 
-namespace QuickTest.Api.Endpoints.WaferPads;
+namespace QuickTest.Api.Endpoints.PostEndpoints;
 
 public class CreateWaferPadEndpoint:Endpoint<CreateWaferPadRequest,CreateWaferPadResponse,WaferPadMapper>{
     private readonly WaferDataService _waferDataService;

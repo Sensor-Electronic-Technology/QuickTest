@@ -7,8 +7,8 @@ using QuickTest.Data.Models.Wafers.Enums;
 
 namespace QuickTest.Data.Mappers;
 
-public class MeasurementMapper:Mapper<InsertMeasurementRequest,InsertMeasurementResponse,Measurement?> {
-    public override InsertMeasurementResponse FromEntity(Measurement? e) {
+public class MeasurementMapper:Mapper<InsertMeasurementRequest,InsertMeasurementResponse,QtMeasurement?> {
+    public override InsertMeasurementResponse FromEntity(QtMeasurement? e) {
         if (e == null) {
             return new InsertMeasurementResponse() {
                 Success = false
@@ -19,11 +19,11 @@ public class MeasurementMapper:Mapper<InsertMeasurementRequest,InsertMeasurement
         };
     }
     
-    public override Measurement? ToEntity(InsertMeasurementRequest r) {
+    public override QtMeasurement? ToEntity(InsertMeasurementRequest r) {
         if (r.Measurement == null) {
             return null;
         }
-        var measurement= new Measurement() {
+        var measurement= new QtMeasurement() {
             Pad = r.Measurement.Pad,
             Current = r.Measurement.Current,
             Wl = r.Measurement.Wl,
@@ -46,7 +46,7 @@ public class MeasurementMapper:Mapper<InsertMeasurementRequest,InsertMeasurement
         }*/
     }
 
-    public override Measurement? UpdateEntity(InsertMeasurementRequest r, Measurement? e) {
+    public override QtMeasurement? UpdateEntity(InsertMeasurementRequest r, QtMeasurement? e) {
         if (e == null) {
             return null;
         }

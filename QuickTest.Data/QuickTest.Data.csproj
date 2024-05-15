@@ -19,7 +19,4 @@
     <PackageReference Include="FastEndpoints" Version="5.25.0" />
     <PackageReference Include="EpiData.Data" Version="1.0.4" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
 </Project>

@@ -1,11 +1,16 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Net.Http.Json;
+using System.Text.Json;
 using EpiData.Data.Models.Epi.Enums;
+using QuickTest.Data.Constants;
+using QuickTest.Data.Contracts.Requests.Get;
 using QuickTest.Data.Contracts.Responses;
 using QuickTest.Data.Models.Wafers;
 using QuickTest.Data.Models.Wafers.Enums;
 using QuickTest.Data.Contracts.Requests.Post;
+using QuickTest.Data.Contracts.Responses.Get;
+using QuickTest.Infrastructure.Services;
 
 //await GetWaferPad();
 
@@ -19,11 +24,11 @@ using QuickTest.Data.Contracts.Requests.Post;
 
 //await TestQuickTest();
 
-void TestFormatString() {
+/*void TestFormatString() {
     string format = "api/wafer/{waferId}";
     
     Console.WriteLine(format.Replace("waferIds","B01-4520-01"));
-}
+}*/
 
 /*async Task TestQuickTest() {
     HttpClient client = new HttpClient();
@@ -85,6 +90,19 @@ async Task TestClientGetManyWafers() {
     }
 }*/
 
+await TestCheck();
+
+
+async Task TestCheck() {
+    HttpClient client = new HttpClient();
+    client.BaseAddress = new Uri("http://localhost:5260");
+    var checkRequest = new CheckQuickTestRequest() { WaferId = "B01-3482-10", MeasurementType = 0 };
+    //client.PostAsJsonAsync($"{QtApiPaths.CheckQuickTestPath}{checkRequest}", checkRequest);
+    var response=await client.GetAsync($"{QtApiPaths.CheckQuickTestPath}/{checkRequest.WaferId}/{checkRequest.MeasurementType}");
+    Console.WriteLine(response.ToString());
+}
+
+
 async Task GetWaferPad() {
     HttpClient client = new HttpClient();
     client.BaseAddress = new Uri("http://localhost:5260");
@@ -101,14 +119,7 @@ async Task GetWaferPad() {
 
 async Task CreateWaferPads() { 
     HttpClient client = new HttpClient();
-    client.BaseAddress = new Uri("http://localhost:5260");
-    var request = new CreateWaferPadRequest() {
-        PadLocation = PadLocation.PadLocationA,
-        PadNumber = 0,
-        PadMapDefinition = new PadMapDefinition(),
-        WaferArea = WaferArea.Center,
-        WaferSize = WaferSize.TwoInch
-    };
+    client.BaseAddress = new Uri("http://172.20.4.206");
 
     List<CreateWaferPadRequest> centerPads = new List<CreateWaferPadRequest>() {
         new CreateWaferPadRequest() {
@@ -432,30 +443,31 @@ async Task CreateWaferPads() {
             WaferSize = WaferSize.TwoInch
         },
     };
+    
     Console.WriteLine("Press any key to create a wafer pad...");
     Console.ReadKey();
     foreach (var pad in centerPads) {
-        HttpResponseMessage response = await client.PostAsJsonAsync("api/wafer_pads/create", pad);
+        HttpResponseMessage response = await client.PostAsJsonAsync("api/pads/create/{waferPad}", pad);
         Console.WriteLine(response.ToString());
     }
 
     foreach (var pad in rightPads) {
-        HttpResponseMessage response = await client.PostAsJsonAsync("api/wafer_pads/create", pad);
+        HttpResponseMessage response = await client.PostAsJsonAsync("api/pads/create/{waferPad}", pad);
         Console.WriteLine(response.ToString());
     }
     
     foreach (var pad in bottomPads) {
-        HttpResponseMessage response = await client.PostAsJsonAsync("api/wafer_pads/create", pad);
+        HttpResponseMessage response = await client.PostAsJsonAsync("api/pads/create/{waferPad}", pad);
         Console.WriteLine(response.ToString());
     }
     
     foreach (var pad in topPads) {
-        HttpResponseMessage response = await client.PostAsJsonAsync("api/wafer_pads/create", pad);
+        HttpResponseMessage response = await client.PostAsJsonAsync("api/pads/create/{waferPad}", pad);
         Console.WriteLine(response.ToString());
     }
     
     foreach (var pad in leftPads) {
-        HttpResponseMessage response = await client.PostAsJsonAsync("api/wafer_pads/create", pad);
+        HttpResponseMessage response = await client.PostAsJsonAsync("api/pads/create/{waferPad}", pad);
         Console.WriteLine(response.ToString());
     }
 

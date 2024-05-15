@@ -1,22 +1,21 @@
 ﻿using FastEndpoints;
 using QuickTest.Data.Constants;
 using QuickTest.Data.Contracts.Requests.Get;
-using QuickTest.Data.Contracts.Responses.Get;
 using QuickTest.Data.Contracts.Responses.Get.Excel;
-using QuickTest.Data.Models.Wafers.Enums;
+using QuickTest.Data.Models.Measurements;
 using QuickTest.Infrastructure.Services;
 
 namespace QuickTest.Api.Endpoints.Get.Excel.Many;
 
-public class GetManyInitialExcelEndpoint:Endpoint<GetManyResultsRequest,GetManyResultsExcelResponse> {
+public class GetManyExcelResultsEndpoint:Endpoint<GetManyResultsRequest,GetManyResultsExcelResponse> {
     private readonly QuickTestDataService _qtDataService;
     
-    public GetManyInitialExcelEndpoint(QuickTestDataService qtDataService) {
+    public GetManyExcelResultsEndpoint(QuickTestDataService qtDataService) {
         this._qtDataService = qtDataService;
     }
     
     public override void Configure() {
-        Get(QtApiPaths.GetManyInitialExcelResultsPath+"{waferIds}");
+        Get(QtApiPaths.GetManyExcelResultsPath+"{waferIds}");
         AllowAnonymous();
     }
     
@@ -28,7 +27,7 @@ public class GetManyInitialExcelEndpoint:Endpoint<GetManyResultsRequest,GetManyR
         if (!request.WaferIds.Any()) {
             ThrowError("Wafer list cannot be empty");
         }
-        var rows = await this._qtDataService.GetResults(request.WaferIds,MeasurementType.Initial);
+        var rows = await this._qtDataService.GetResults(request.WaferIds,(MeasurementType)request.MeasurementType);
         await SendAsync(new GetManyResultsExcelResponse(){Rows = rows}, cancellation: cancellationToken);
     }
     

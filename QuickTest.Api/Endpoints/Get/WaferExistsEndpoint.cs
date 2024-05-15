@@ -22,7 +22,7 @@ public class WaferExistsEndpoint:Endpoint<QtWaferExistsRequest,QtWaferExistsResp
         if (string.IsNullOrEmpty(req.WaferId)) {
             ThrowError("WaferId cannot be null or empty");
         }
-        var exists = await this._qtDataService.WaferExists(req.WaferId);
+        var exists = await this._qtDataService.QtWaferExists(req.WaferId);
         await SendAsync(new QtWaferExistsResponse() { Exists = exists },cancellation:ct);
     }
 }

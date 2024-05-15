@@ -19,11 +19,16 @@ public class WaferDataService {
     public WaferDataService(ILogger<WaferDataService> logger,IMongoClient mongoClient) {
         this._logger = logger;
         var database = mongoClient.GetDatabase("quick_test_db");
-        _waferPadCollection = database.GetCollection<WaferPad>("wafer_pads");
+        this._waferPadCollection = database.GetCollection<WaferPad>("wafer_pads");
     }
 
     public Task<List<WaferPad>?> GetWaferPads(WaferSize waferSize) {
         return this._waferPadCollection.Find(e=>e.WaferSize==waferSize).ToListAsync();
+    }
+
+    public async Task<List<WaferPad>> GetWaferPads(List<string> pads) {
+        var p= await this._waferPadCollection.Find(e=>pads.Contains(e.Identifier!)).ToListAsync();
+        return p ?? Enumerable.Empty<WaferPad>().ToList();
     }
     
     /*public Task<List<WaferPad>?> GetAvailableBurnInPads(WaferSize waferSize) {

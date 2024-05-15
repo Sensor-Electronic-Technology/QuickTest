@@ -3,20 +3,20 @@ using QuickTest.Data.Constants;
 using QuickTest.Data.Contracts.Requests.Get;
 using QuickTest.Data.Contracts.Responses.Get;
 using QuickTest.Data.Contracts.Responses.Get.Excel;
+using QuickTest.Data.Models.Measurements;
 using QuickTest.Data.Models.Wafers.Enums;
 using QuickTest.Infrastructure.Services;
 
 namespace QuickTest.Api.Endpoints.Get.Excel.Single;
-
-public class GetFinalExcelResultsEndpoint:Endpoint<GetResultRequest,GetResultExcelResponse> {
+public class GetExcelResultsEndpoint:Endpoint<GetResultRequest,GetResultExcelResponse> {
     private readonly QuickTestDataService _qtDataService;
     
-    public GetFinalExcelResultsEndpoint(QuickTestDataService qtDataService) {
+    public GetExcelResultsEndpoint(QuickTestDataService qtDataService) {
         this._qtDataService = qtDataService;
     }
     
     public override void Configure() {
-        Get(QtApiPaths.GetFinalExcelResultsPath+"{waferId}");
+        Get(QtApiPaths.GetExcelResultPath+"{waferId}");
         AllowAnonymous();
     }
     
@@ -24,7 +24,7 @@ public class GetFinalExcelResultsEndpoint:Endpoint<GetResultRequest,GetResultExc
         if (string.IsNullOrEmpty(request.WaferId)) {
             ThrowError("WaferId cannot be null or empty");
         }
-        var rows = await this._qtDataService.GetResult(request.WaferId, MeasurementType.Final);
+        var rows = await this._qtDataService.GetResult(request.WaferId,(MeasurementType)request.MeasurementType);
         await SendAsync(new GetResultExcelResponse() { Row = rows }, cancellation: cancellationToken);
     }
 }

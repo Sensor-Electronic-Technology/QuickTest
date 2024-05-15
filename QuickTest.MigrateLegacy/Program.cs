@@ -6,9 +6,11 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Kiota.Abstractions;
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
+using QuickTest.Data.Models;
 using QuickTest.Data.Models.Measurements;
 using QuickTest.Data.Models.Wafers;
 using QuickTest.Data.Models.Wafers.Enums;
@@ -33,110 +35,136 @@ var waferList=await service.GetWaferList();*/
 //await QuickTestV2Migrate();
 //await TestGenerated();
 //await TestQtV2();
-await GetInitialResults();
+//await GetInitialResults();
 
-/*
-async Task QuickTestV2Migrate() {
+//await Migrate();
+//await CreateHelperCollections();
+
+await TestGetWaferPads();
+
+async Task TestGetWaferPads() {
+    var client=new MongoClient("mongodb://172.20.3.41:27017");
+    var database=client.GetDatabase("quick_test_db");
+    var initialCollection=database.GetCollection<QtMeasurement>("init_measurements");
+    var waferPadCollection=database.GetCollection<WaferPad>("wafer_pads");
+    var tested = await initialCollection.Find(e => e.WaferId == "B01-3482-10").Project(e => e.Pad).ToListAsync();
+    /*List<string?> pads = ["A","B","G6-E"];*/
+    var result=await waferPadCollection.Find(e=>tested.Contains(e.Identifier)).ToListAsync();
+    foreach (var pad in result) {
+        Console.WriteLine($"Pad: {pad.Identifier} SvgX: {pad.SvgObject.X} SvgY: {pad.SvgObject.Y} SvgR: {pad.SvgObject.Radius}" );
+    }
+}
+
+async Task Migrate() {
+    var context = new EpiContext();
     var clientWork=new MongoClient("mongodb://172.20.3.41:27017");
-    var database=clientWork.GetDatabase("quick_test_db");
-    var qtCollection = database.GetCollection<QuickTestResult>("quick_test");
-    var qtV2Collection = database.GetCollection<QuickTestResultV2>("quick_test_v2");
-    var measureCollection = database.GetCollection<MeasurementV2>("measurements");
-    var spectrumCollection = database.GetCollection<SpectrumV2>("spectrum");
-
+    var clientPi=new MongoClient("mongodb://192.168.68.112:27017");
+    var databaseWork=clientWork.GetDatabase("quick_test_db");
+    var databasePi=clientPi.GetDatabase("quick_test_db");
+    var qtCollectionWork=databaseWork.GetCollection<QuickTestResult>("quick_test");
+    var initMeasureCollection=databaseWork.GetCollection<QtMeasurement>("init_measurements");
+    var finalMeasureCollection=databaseWork.GetCollection<QtMeasurement>("final_measurements");
+    var initSpectCollection=databaseWork.GetCollection<Spectrum>("init_spectrum");
+    var finalSpectCollection=databaseWork.GetCollection<Spectrum>("final_spectrum");
+    await qtCollectionWork.Indexes.CreateOneAsync(new CreateIndexModel<QuickTestResult>(Builders<QuickTestResult>.IndexKeys.Ascending(e => e.WaferId)));
+    
+    Console.WriteLine("Starting Migration...");
+    var start=new DateTime(2023,1,1);
+    var wafers=await context.EpiDataInitials.Where(e=>e.DateTime>=start).Select(e=>e.WaferId)
+        .Distinct().ToListAsync();
+    Console.WriteLine($"Wafer Count:{wafers.Count()}");
+    int saveCounter=0;
     int count = 0;
-    Console.WriteLine("Starting....");
-    using (var cursor = await qtCollection.FindAsync(_=>true))
-    {
-        while (await cursor.MoveNextAsync())
-        {
-            var batch = cursor.Current;
-            foreach (var doc in batch) {
-                QuickTestResultV2 qt = new QuickTestResultV2();
-                qt._id = doc._id;
-                qt.WaferId = doc.WaferId;
-                qt.InitialTimeStamp = doc.InitialTimeStamp;
-                qt.FinalTimeStamp = doc.FinalTimeStamp;
-                await qtV2Collection.InsertOneAsync(qt);
-                
-                if(doc.InitialMeasurements!=null) {
-                    if (doc.InitialMeasurements.Any()) {
-                        var measurements = doc.InitialMeasurements.Select(e => new MeasurementV2() {
-                            _id = ObjectId.GenerateNewId(),
-                            WaferId = doc.WaferId ?? "",
-                            QuickTestResultId = doc._id,
-                            MeasurementType = e.MeasurementType,
-                            Pad = e.Pad,
-                            Current = e.Current,
-                            Wl = e.Wl,
-                            Power = e.Power,
-                            Voltage = e.Voltage,
-                            Knee = e.Knee,
-                            Ir = e.Ir
-                        });
-                        await measureCollection.InsertManyAsync(measurements);
-                    }
-                }
-                
-                if(doc.FinalMeasurements!=null) {
-                    if (doc.FinalMeasurements.Any()) {
-                        var measurements = doc.FinalMeasurements.Select(e => new MeasurementV2() {
-                            _id = ObjectId.GenerateNewId(),
-                            WaferId = doc.WaferId ?? "",
-                            QuickTestResultId = doc._id,
-                            MeasurementType = e.MeasurementType,
-                            Pad = e.Pad,
-                            Current = e.Current,
-                            Wl = e.Wl,
-                            Power = e.Power,
-                            Voltage = e.Voltage,
-                            Knee = e.Knee,
-                            Ir = e.Ir
-                        });
-                        await measureCollection.InsertManyAsync(measurements);
-                    }
-                }
-                
-                if (doc.InitialSpectrum != null) {
-                    if (doc.InitialSpectrum.Any()) {
-                        var spectrumInitial = doc.InitialSpectrum.Select(e => new SpectrumV2() {
-                            _id = ObjectId.GenerateNewId(),
-                            WaferId = doc.WaferId ?? "",
-                            QuickTestResultId = doc._id,
-                            MeasurementType = MeasurementType.Initial,
-                            Pad = e.Pad,
-                            Current = e.Current,
-                            Wl = e.Wl,
-                            Intensity = e.Intensity
-                        });
-                        await spectrumCollection.InsertManyAsync(spectrumInitial);
-                    }
-                }
-                
-                if (doc.FinalSpectrum != null) {
-                    if (doc.FinalSpectrum.Any()) {
-                        var spectrumFinal = doc.FinalSpectrum.Select(e => new SpectrumV2() {
-                            _id = ObjectId.GenerateNewId(),
-                            WaferId = doc.WaferId ?? "",
-                            QuickTestResultId = doc._id,
-                            MeasurementType = MeasurementType.Final,
-                            Pad = e.Pad,
-                            Current = e.Current,
-                            Wl = e.Wl,
-                            Intensity = e.Intensity
-                        });
-                        await spectrumCollection.InsertManyAsync(spectrumFinal);
-                    }
-                }
-
-                count++;
-                Console.WriteLine($"QtV2 Created: {doc.WaferId} Count: {count}");
+    List<QuickTestResult> results=new();
+    List<Spectrum> initSpectrumResults=new();
+    List<QtMeasurement> initMeasureResults=new();
+    List<Spectrum> finalSpectResults=new();
+    List<QtMeasurement> finalMeasureResults=new();
+    foreach(var wafer in wafers) {
+        var result=await CreateQuickTestResult(context,wafer);
+        if (result.qt != null) {
+            if(result.initSpect!=null) {
+                initSpectrumResults.AddRange(result.initSpect);
             }
+            if(result.finalSpect!=null) {
+                finalSpectResults.AddRange(result.finalSpect);
+            }
+            if(result.initMeas!=null) {
+                initMeasureResults.AddRange(result.initMeas);
+            }
+            if(result.finalMeas!=null) {
+                finalMeasureResults.AddRange(result.finalMeas);
+            }
+            results.Add(result.qt);
+            saveCounter++;
+            count++;
+            Console.WriteLine($"Created QuickTestResult for wafer: {wafer} Count:{count}");
+        }
+        if(saveCounter>=100) {
+            Console.WriteLine("Saving 100 records...");
+            await qtCollectionWork.InsertManyAsync(results);
+            
+            if(initMeasureResults.Any()) {
+                await initMeasureCollection.InsertManyAsync(initMeasureResults);
+            }
+            if(finalMeasureResults.Any()) {
+                await finalMeasureCollection.InsertManyAsync(finalMeasureResults);
+            }
+            if (initSpectrumResults.Any()) {
+                await initSpectCollection.InsertManyAsync(initSpectrumResults);
+            }
+            if (finalSpectResults.Any()) {
+                await finalSpectCollection.InsertManyAsync(finalSpectResults);
+            }
+            initSpectrumResults.Clear();
+            finalSpectResults.Clear();
+            initMeasureResults.Clear();
+            finalMeasureResults.Clear();
+            results.Clear();
+            saveCounter=0;
+            Console.WriteLine("Collecting next 100");
         }
     }
-    Console.WriteLine("Completed...");
+
+    if (results.Any()) {
+        Console.WriteLine("Saving leftover records...");
+        await qtCollectionWork.InsertManyAsync(results);
+        results.Clear();
+        Console.WriteLine("Completed");
+    }
+
+    Console.WriteLine("Migration Completed, check database...");
 }
-*/
+
+async Task CreateHelperCollections() {
+    var client=new MongoClient("mongodb://172.20.3.41:27017");
+    var database=client.GetDatabase("quick_test_db");
+    var currentCollection = database.GetCollection<MeasurementCurrent>("measure_current");
+    await currentCollection.Indexes.CreateOneAsync(new CreateIndexModel<MeasurementCurrent>(Builders<MeasurementCurrent>.IndexKeys.Ascending(e => e.Name)));
+    var stationCollection = database.GetCollection<ProbeStation>("probe_stations");
+    await stationCollection.Indexes.CreateOneAsync(new CreateIndexModel<ProbeStation>(Builders<ProbeStation>.IndexKeys.Ascending(e => e.StationNumber)));
+    
+    ProbeStation station1 = new ProbeStation() {
+        _id = ObjectId.GenerateNewId(),
+        Name = "Qt Main Station",
+        StationNumber = 1
+    };
+    ProbeStation station2 = new ProbeStation() {
+        _id = ObjectId.GenerateNewId(),
+        Name = "Qt Secondary Station",
+        StationNumber = 2
+    };
+
+    MeasurementCurrent _20mA = new MeasurementCurrent() { _id = ObjectId.GenerateNewId(), Name = "20mA", Value = 20 };
+    MeasurementCurrent _50mA = new MeasurementCurrent() { _id = ObjectId.GenerateNewId(), Name = "50mA", Value = 50 };
+
+    await currentCollection.InsertOneAsync(_20mA);
+    await currentCollection.InsertOneAsync(_50mA);
+    await stationCollection.InsertOneAsync(station1);
+    await stationCollection.InsertOneAsync(station2);
+    Console.WriteLine("Current and Station Collection Created");
+
+}
 
 
 
@@ -145,8 +173,8 @@ async Task GetInitialResults() {
     var database=clientWork.GetDatabase("quick_test_db");
     var qtCollection=database.GetCollection<QuickTestResult>("quick_test");
     var qtCollectionWork=database.GetCollection<QuickTestResult>("quick_test");
-    var initMeasureCollection=database.GetCollection<Measurement>("init_measurements");
-    var finalMeasureCollection=database.GetCollection<Measurement>("final_measurements");
+    var initMeasureCollection=database.GetCollection<QtMeasurement>("init_measurements");
+    var finalMeasureCollection=database.GetCollection<QtMeasurement>("final_measurements");
     var initSpectCollection=database.GetCollection<Spectrum>("init_spectrum");
     var finalSpectCollection=database.GetCollection<Spectrum>("final_spectrum");
 
@@ -245,87 +273,10 @@ async Task GetWaferListV1() {
     await waferCollection.InsertManyAsync(waferList.Select(e=>new Wafer(){WaferId = e ?? "not set"}));
 }*/
 
-async Task Migrate() {
-    var context = new EpiContext();
-    var clientWork=new MongoClient("mongodb://172.20.3.41:27017");
-    var clientPi=new MongoClient("mongodb://192.168.68.112:27017");
-    var databaseWork=clientWork.GetDatabase("quick_test_db");
-    var databasePi=clientPi.GetDatabase("quick_test_db");
-    var waferCollection=databaseWork.GetCollection<QuickTestResult>("quick_test");
-    var qtCollectionWork=databaseWork.GetCollection<QuickTestResult>("quick_test");
-    var initMeasureCollection=databaseWork.GetCollection<Measurement>("init_measurements");
-    var finalMeasureCollection=databaseWork.GetCollection<Measurement>("final_measurements");
-    var initSpectCollection=databaseWork.GetCollection<Spectrum>("init_spectrum");
-    var finalSpectCollection=databaseWork.GetCollection<Spectrum>("final_spectrum");
-    Console.WriteLine("Starting Migration...");
-    var wafers=await context.EpiDataInitials.Select(e=>e.WaferId)
-        .Distinct().ToListAsync();
-    Console.WriteLine($"Wafer Count:{wafers.Count()}");
-    int saveCounter=0;
-    int count = 0;
-    List<QuickTestResult> results=new();
-    List<Spectrum> initSpectrumResults=new();
-    List<Measurement> initMeasureResults=new();
-    List<Spectrum> finalSpectResults=new();
-    List<Measurement> finalMeasureResults=new();
-    foreach(var wafer in wafers) {
-        var result=await CreateQuickTestResult(context,wafer);
-        if (result.qt != null) {
-            if(result.initSpect!=null) {
-                initSpectrumResults.AddRange(result.initSpect);
-            }
-            if(result.finalSpect!=null) {
-                finalSpectResults.AddRange(result.finalSpect);
-            }
-            if(result.initMeas!=null) {
-                initMeasureResults.AddRange(result.initMeas);
-            }
-            if(result.finalMeas!=null) {
-                finalMeasureResults.AddRange(result.finalMeas);
-            }
-            results.Add(result.qt);
-            saveCounter++;
-            count++;
-            Console.WriteLine($"Created QuickTestResult for wafer: {wafer} Count:{count}");
-        }
-        if(saveCounter>=100) {
-            Console.WriteLine("Saving 100 records...");
-            await qtCollectionWork.InsertManyAsync(results);
-            
-            if(initMeasureResults.Any()) {
-                await initMeasureCollection.InsertManyAsync(initMeasureResults);
-            }
-            if(finalMeasureResults.Any()) {
-                await finalMeasureCollection.InsertManyAsync(finalMeasureResults);
-            }
-            if (initSpectrumResults.Any()) {
-                await initSpectCollection.InsertManyAsync(initSpectrumResults);
-            }
-            if (finalSpectResults.Any()) {
-                await finalSpectCollection.InsertManyAsync(finalSpectResults);
-            }
-            initSpectrumResults.Clear();
-            finalSpectResults.Clear();
-            initMeasureResults.Clear();
-            finalMeasureResults.Clear();
-            results.Clear();
-            saveCounter=0;
-            Console.WriteLine("Collecting next 100");
-        }
-    }
-
-    if (results.Any()) {
-        Console.WriteLine("Saving leftover records...");
-        await qtCollectionWork.InsertManyAsync(results);
-        results.Clear();
-        Console.WriteLine("Completed");
-    }
-
-    Console.WriteLine("Migration Completed, check database...");
-}
 
 
-async Task<(QuickTestResult? qt,List<Measurement>? initMeas,List<Measurement>? finalMeas,List<Spectrum>? initSpect,List<Spectrum>? finalSpect)> CreateQuickTestResult(EpiContext context, string waferId) {
+
+async Task<(QuickTestResult? qt,List<QtMeasurement>? initMeas,List<QtMeasurement>? finalMeas,List<Spectrum>? initSpect,List<Spectrum>? finalSpect)> CreateQuickTestResult(EpiContext context, string waferId) {
     var qtId = ObjectId.GenerateNewId();
     var initialMeasurements = await CreateInitialMeasurements(context, waferId,qtId);
     var finalMeasurements = await CreateFinalMeasurements(context, waferId,qtId);
@@ -336,6 +287,7 @@ async Task<(QuickTestResult? qt,List<Measurement>? initMeas,List<Measurement>? f
     var qt=new QuickTestResult() {
         _id = qtId,
         WaferId = waferId,
+        ProbeStationId = 1,
         InitialTimeStamp = initialMeasurements.timeStamp,
         FinalTimeStamp = finalMeasurements.timeStamp,
     };
@@ -344,57 +296,57 @@ async Task<(QuickTestResult? qt,List<Measurement>? initMeas,List<Measurement>? f
     return (qt,initialMeasurements.measurements,finalMeasurements.measurements,initSpectrum,finalSpectrum);
 }
 
-async Task<(List<Measurement>? measurements,DateTime timeStamp)> CreateInitialMeasurements(EpiContext context, string waferId, ObjectId qtId) {
+async Task<(List<QtMeasurement>? measurements,DateTime timeStamp)> CreateInitialMeasurements(EpiContext context, string waferId, ObjectId qtId) {
         var initialData = await context.EpiDataInitials.FirstOrDefaultAsync(e => e.WaferId == waferId);
     var initial50mA= await context.EpiDataInitial50mas.FirstOrDefaultAsync(e => e.WaferId == waferId);
-    var initialMeasurements = new List<Measurement>();
+    var initialMeasurements = new List<QtMeasurement>();
     if (initialData != null) {
         if (initialData.CenterAPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",initialData.CenterAPower,initialData.CenterAVolt,
+                20,initialData.CenterAPower,initialData.CenterAVolt,
                 initialData.CenterAWl,initialData.CenterAReverse ?? 0,initialData.CenterAKnee,PadLocation.PadLocationA.Value));
         }
 
         
         if(initialData.CenterBPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",initialData.CenterBPower,initialData.CenterBVolt,
+                20,initialData.CenterBPower,initialData.CenterBVolt,
                 initialData.CenterBWl,initialData.CenterBReverse ?? 0,initialData.CenterBKnee,PadLocation.PadLocationB.Value));
         }
         
         if(initialData.CenterCPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",initialData.CenterCPower,initialData.CenterCVolt,
+                20,initialData.CenterCPower,initialData.CenterCVolt,
                 initialData.CenterCWl,initialData.CenterCReverse ?? 0,initialData.CenterCKnee,PadLocation.PadLocationC.Value));
         }
         
         if(initialData.CenterDPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",initialData.CenterDPower,initialData.CenterDVolt,
+                20,initialData.CenterDPower,initialData.CenterDVolt,
                 initialData.CenterDWl,initialData.CenterDReverse ?? 0,initialData.CenterDKnee,PadLocation.PadLocationD.Value));
         }
         
         if(initialData.TopPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",initialData.TopPower,initialData.TopVolt,
+                20,initialData.TopPower,initialData.TopVolt,
                 initialData.TopWl,initialData.TopReverse ?? 0,initialData.TopKnee,"T2-E"));
         }
         
         if(initialData.LeftPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",initialData.LeftPower,initialData.LeftVolt,
+                20,initialData.LeftPower,initialData.LeftVolt,
                 initialData.LeftWl,initialData.LeftReverse ?? 0,initialData.LeftKnee,"L2-E"));
         }
         
         if(initialData.BottomPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",initialData.BottomPower,initialData.BottomVolt,
+                20,initialData.BottomPower,initialData.BottomVolt,
                 initialData.BottomWl,initialData.BottomReverse ?? 0,initialData.BottomKnee,"G2-E"));
         }
         
         if(initialData.RightPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",initialData.RightPower,initialData.RightVolt,
+                20,initialData.RightPower,initialData.RightVolt,
                 initialData.RightWl,initialData.RightReverse ?? 0,initialData.RightKnee,"R2-E"));
         }
     }
@@ -402,49 +354,49 @@ async Task<(List<Measurement>? measurements,DateTime timeStamp)> CreateInitialMe
     if (initial50mA != null) {
         if (initial50mA.CenterAPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",initial50mA.CenterAPower,initial50mA.CenterAVolt,
+                50,initial50mA.CenterAPower,initial50mA.CenterAVolt,
                 initial50mA.CenterAWl,initial50mA.CenterAReverse ?? 0,initial50mA.CenterAKnee,PadLocation.PadLocationA.Value));
         }
         
         if(initial50mA.CenterBPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",initial50mA.CenterBPower,initial50mA.CenterBVolt,
+                50,initial50mA.CenterBPower,initial50mA.CenterBVolt,
                 initial50mA.CenterBWl,initial50mA.CenterBReverse ?? 0,initial50mA.CenterBKnee,PadLocation.PadLocationB.Value));
         }
         
         if(initial50mA.CenterCPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",initial50mA.CenterCPower,initial50mA.CenterCVolt,
+                50,initial50mA.CenterCPower,initial50mA.CenterCVolt,
                 initial50mA.CenterCWl,initial50mA.CenterCReverse ?? 0,initial50mA.CenterCKnee,PadLocation.PadLocationC.Value));
         }
         
         if(initial50mA.CenterDPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",initial50mA.CenterDPower,initial50mA.CenterDVolt,
+                50,initial50mA.CenterDPower,initial50mA.CenterDVolt,
                 initial50mA.CenterDWl,initial50mA.CenterDReverse ?? 0,initial50mA.CenterDKnee,PadLocation.PadLocationD.Value));
         }
         
         if(initial50mA.TopPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",initial50mA.TopPower,initial50mA.TopVolt,
+                50,initial50mA.TopPower,initial50mA.TopVolt,
                 initial50mA.TopWl,initial50mA.TopReverse ?? 0,initial50mA.TopKnee,"T2-E"));
         }
         
         if(initial50mA.LeftPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",initial50mA.LeftPower,initial50mA.LeftVolt,
+                50,initial50mA.LeftPower,initial50mA.LeftVolt,
                 initial50mA.LeftWl,initial50mA.LeftReverse ?? 0,initial50mA.LeftKnee,"L2-E"));
         }
         
         if(initial50mA.BottomPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",initial50mA.BottomPower,initial50mA.BottomVolt,
+                50,initial50mA.BottomPower,initial50mA.BottomVolt,
                 initial50mA.BottomWl,initial50mA.BottomReverse ?? 0,initial50mA.BottomKnee,"G2-E"));
         }
         
         if(initial50mA.RightPower > 0) {
             initialMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",initial50mA.RightPower,initial50mA.RightVolt,
+                50,initial50mA.RightPower,initial50mA.RightVolt,
                 initial50mA.RightWl,initial50mA.RightReverse ?? 0,initial50mA.RightKnee,"R2-E"));
         }
     }
@@ -452,57 +404,57 @@ async Task<(List<Measurement>? measurements,DateTime timeStamp)> CreateInitialMe
     return (initialMeasurements,initialData?.DateTime ?? DateTime.MinValue);
 }
 
-async Task<(List<Measurement>? measurements,DateTime timeStamp)> CreateFinalMeasurements(EpiContext context, string waferId,ObjectId qtId) {
+async Task<(List<QtMeasurement>? measurements,DateTime timeStamp)> CreateFinalMeasurements(EpiContext context, string waferId,ObjectId qtId) {
     var finalData = await context.EpiDataAfters.FirstOrDefaultAsync(e => e.WaferId == waferId);
     var final50mAData= await context.EpiDataAfter50mas.FirstOrDefaultAsync(e => e.WaferId == waferId);
-    var finalMeasurements = new List<Measurement>();
+    var finalMeasurements = new List<QtMeasurement>();
     if (finalData != null) {
         if (finalData.CenterAPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",finalData.CenterAPower,finalData.CenterAVolt,
+                20,finalData.CenterAPower,finalData.CenterAVolt,
                 finalData.CenterAWl,finalData.CenterAReverse ?? 0,finalData.CenterAKnee,PadLocation.PadLocationA.Value));
         }
 
         
         if(finalData.CenterBPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",finalData.CenterBPower,finalData.CenterBVolt,
+                20,finalData.CenterBPower,finalData.CenterBVolt,
                 finalData.CenterBWl,finalData.CenterBReverse ?? 0,finalData.CenterBKnee,PadLocation.PadLocationB.Value));
         }
         
         if(finalData.CenterCPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",finalData.CenterCPower,finalData.CenterCVolt,
+               20,finalData.CenterCPower,finalData.CenterCVolt,
                 finalData.CenterCWl,finalData.CenterCReverse ?? 0,finalData.CenterCKnee,PadLocation.PadLocationC.Value));
         }
         
         if(finalData.CenterDPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",finalData.CenterDPower,finalData.CenterDVolt,
+                20,finalData.CenterDPower,finalData.CenterDVolt,
                 finalData.CenterDWl,finalData.CenterDReverse ?? 0,finalData.CenterDKnee,PadLocation.PadLocationD.Value));
         }
         
         if(finalData.TopPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",finalData.TopPower,finalData.TopVolt,
+                20,finalData.TopPower,finalData.TopVolt,
                 finalData.TopWl,finalData.TopReverse ?? 0,finalData.TopKnee,"T2-E"));
         }
         
         if(finalData.LeftPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",finalData.LeftPower,finalData.LeftVolt,
+                20,finalData.LeftPower,finalData.LeftVolt,
                 finalData.LeftWl,finalData.LeftReverse ?? 0,finalData.LeftKnee,"L2-E"));
         }
         
         if(finalData.BottomPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",finalData.BottomPower,finalData.BottomVolt,
+                20,finalData.BottomPower,finalData.BottomVolt,
                 finalData.BottomWl,finalData.BottomReverse ?? 0,finalData.BottomKnee,"G2-E"));
         }
         
         if(finalData.RightPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "20mA",finalData.RightPower,finalData.RightVolt,
+                20,finalData.RightPower,finalData.RightVolt,
                 finalData.RightWl,finalData.RightReverse ?? 0,finalData.RightKnee,"R2-E"));
         }
     }
@@ -510,49 +462,49 @@ async Task<(List<Measurement>? measurements,DateTime timeStamp)> CreateFinalMeas
     if (final50mAData != null) {
         if (final50mAData.CenterAPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",final50mAData.CenterAPower,final50mAData.CenterAVolt,
+                50,final50mAData.CenterAPower,final50mAData.CenterAVolt,
                 final50mAData.CenterAWl,final50mAData.CenterAReverse ?? 0,final50mAData.CenterAKnee,PadLocation.PadLocationA.Value));
         }
         
         if(final50mAData.CenterBPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",final50mAData.CenterBPower,final50mAData.CenterBVolt,
+                50,final50mAData.CenterBPower,final50mAData.CenterBVolt,
                 final50mAData.CenterBWl,final50mAData.CenterBReverse ?? 0,final50mAData.CenterBKnee,PadLocation.PadLocationB.Value));
         }
         
         if(final50mAData.CenterCPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",final50mAData.CenterCPower,final50mAData.CenterCVolt,
+                50,final50mAData.CenterCPower,final50mAData.CenterCVolt,
                 final50mAData.CenterCWl,final50mAData.CenterCReverse ?? 0,final50mAData.CenterCKnee,PadLocation.PadLocationC.Value));
         }
         
         if(final50mAData.CenterDPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",final50mAData.CenterDPower,final50mAData.CenterDVolt,
+                50,final50mAData.CenterDPower,final50mAData.CenterDVolt,
                 final50mAData.CenterDWl,final50mAData.CenterDReverse ?? 0,final50mAData.CenterDKnee,PadLocation.PadLocationD.Value));
         }
         
         if(final50mAData.TopPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",final50mAData.TopPower,final50mAData.TopVolt,
+                50,final50mAData.TopPower,final50mAData.TopVolt,
                 final50mAData.TopWl,final50mAData.TopReverse ?? 0,final50mAData.TopKnee,"T2-E"));
         }
         
         if(final50mAData.LeftPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",final50mAData.LeftPower,final50mAData.LeftVolt,
+                50,final50mAData.LeftPower,final50mAData.LeftVolt,
                 final50mAData.LeftWl,final50mAData.LeftReverse ?? 0,final50mAData.LeftKnee,"L2-E"));
         }
         
         if(final50mAData.BottomPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",final50mAData.BottomPower,final50mAData.BottomVolt,
+                50,final50mAData.BottomPower,final50mAData.BottomVolt,
                 final50mAData.BottomWl,final50mAData.BottomReverse ?? 0,final50mAData.BottomKnee,"G2-E"));
         }
         
         if(final50mAData.RightPower > 0) {
             finalMeasurements.Add(CreateMeasurement(MeasurementType.Initial,waferId,qtId,
-                "50mA",final50mAData.RightPower,final50mAData.RightVolt,
+                50,final50mAData.RightPower,final50mAData.RightVolt,
                 final50mAData.RightWl,final50mAData.RightReverse ?? 0,final50mAData.RightKnee,"R2-E"));
         }
     }
@@ -560,8 +512,8 @@ async Task<(List<Measurement>? measurements,DateTime timeStamp)> CreateFinalMeas
     return (finalMeasurements,finalData?.DateTime ?? DateTime.MinValue);
 }
 
-Measurement CreateMeasurement(MeasurementType type,string waferId,ObjectId qtId,string current, double power, double voltage, double wl, double ir, double knee,string pad) {
-    return new Measurement() {
+QtMeasurement CreateMeasurement(MeasurementType type,string waferId,ObjectId qtId,int current, double power, double voltage, double wl, double ir, double knee,string pad) {
+    return new QtMeasurement() {
         WaferId = waferId,
         QuickTestResultId = qtId,
         MeasurementType = type,
@@ -585,7 +537,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationA.Value,
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterAWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterASpect)
             });
@@ -597,7 +550,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationA.Name,
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterAWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterASpect50mA)
             });
@@ -609,7 +563,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationB.Name,
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterBWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterBSpect)
             });
@@ -621,7 +576,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationB.Name,
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterBWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterBSpect50mA)
             });
@@ -633,7 +589,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationC.Name,
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterCWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterCSpect)
             });
@@ -645,7 +602,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationC.Name,
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterCWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterCSpect50mA)
             });
@@ -657,7 +615,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationD.Name,
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterDWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterDSpect)
             });
@@ -669,7 +628,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationD.Name,
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterDWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterDSpect50mA)
             });
@@ -681,7 +641,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="R2-E",
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.RightWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.RightSpect)
             });
@@ -693,7 +654,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="R2-E",
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.RightWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.RightSpect50mA)
             });
@@ -705,7 +667,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="T2-E",
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.TopWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.TopSpect)
             });
@@ -717,7 +680,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="T2-E",
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.TopWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.TopSpect50mA)
             });
@@ -729,7 +693,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="L2-E",
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.LeftWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.LeftSpect)
             });
@@ -741,7 +706,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="L2-E",
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.LeftWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.LeftSpect50mA)
             });
@@ -753,7 +719,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="G2-E",
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.BottomWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.BottomSpect)
             });
@@ -765,7 +732,8 @@ async Task<List<Spectrum>?> CreateInitialSpectrum(EpiContext context, string waf
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="G2-E",
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Initial,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.BottomWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.BottomSpect50mA)
             });
@@ -785,7 +753,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationA.Value,
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterAWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterASpect)
             });
@@ -797,7 +766,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationA.Name,
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterAWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterASpect50mA)
             });
@@ -809,7 +779,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationB.Name,
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterBWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterBSpect)
             });
@@ -821,7 +792,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationB.Name,
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterBWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterBSpect50mA)
             });
@@ -833,7 +805,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationC.Name,
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterCWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterCSpect)
             });
@@ -845,7 +818,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationC.Name,
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterCWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterCSpect50mA)
             });
@@ -857,7 +831,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationD.Name,
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterDWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterDSpect)
             });
@@ -869,7 +844,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad=PadLocation.PadLocationD.Name,
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.CenterDWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.CenterDSpect50mA)
             });
@@ -881,7 +857,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="R2-E",
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.RightWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.RightSpect)
             });
@@ -893,7 +870,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="R2-E",
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.RightWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.RightSpect50mA)
             });
@@ -905,7 +883,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="T2-E",
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.TopWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.TopSpect)
             });
@@ -917,7 +896,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="T2-E",
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.TopWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.TopSpect50mA)
             });
@@ -929,7 +909,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="L2-E",
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.LeftWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.LeftSpect)
             });
@@ -941,7 +922,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="L2-E",
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.LeftWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.LeftSpect50mA)
             });
@@ -953,7 +935,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="G2-E",
-                Current="20mA",
+                Current=20,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.BottomWl),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.BottomSpect)
             });
@@ -965,7 +948,8 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
                 WaferId = waferId,
                 QuickTestResultId = qtId,
                 Pad="G2-E",
-                Current="50mA",
+                Current=50,
+                MeasurementType = MeasurementType.Final,
                 Wl = JsonSerializer.Deserialize<List<double>>(spectrum.BottomWl50mA),
                 Intensity = JsonSerializer.Deserialize<List<double>>(spectrum.BottomSpect50mA)
             });
@@ -1041,7 +1025,7 @@ async Task PrintProperties() {
                 if (initialData.CenterAPower != 0) {
                     initialMeasurements.Add(new Measurement() {
                         MeasurementType = MeasurementType.Initial,
-                        Current = "20mA",
+                        Current = 20,
                         Power = initialData.CenterAPower,
                         Voltage = initialData.CenterAVolt,
                         Wl = initialData.CenterAWl,
@@ -1055,7 +1039,7 @@ async Task PrintProperties() {
                     initialMeasurements.Add(new Measurement() {
                         MeasurementType = MeasurementType.Initial,
                         Pad = PadLocation.PadLocationB.Name,
-                        Current = "20mA",
+                        Current = 20,
                         Power = initialData.CenterBPower,
                         Voltage = initialData.CenterBVolt,
                         Wl = initialData.CenterBWl,
@@ -1069,7 +1053,7 @@ async Task PrintProperties() {
                     initialMeasurements.Add(new Measurement() {
                         MeasurementType = MeasurementType.Initial,
                         Pad = PadLocation.PadLocationC.Name,
-                        Current = "20mA",
+                        Current = 20,
                         Power = initialData.CenterCPower,
                         Voltage = initialData.CenterCVolt,
                         Wl = initialData.CenterCWl,
