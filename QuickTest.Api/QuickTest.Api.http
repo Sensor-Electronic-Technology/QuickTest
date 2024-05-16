@@ -13,7 +13,7 @@ GET {{QuickTest.Api_HostAddress}}/api/results/all/excel/B01-3766-06
 Accept: text/plain
 
 ### GET request to get initial data
-GET http://172.20.4.206/api/results/final/excel/B01-3766-06?1
+GET http://172.20.4.206/api/results/excel/B01-3277-28?1
 Accept: application/json
 
 ### GET request to get all wafer pads
@@ -22,6 +22,10 @@ Accept: application/json
 
 ### GET request to get all wafer pads
 GET {{QuickTest.Api_HostAddress}}/api/map/2
+Accept: application/json
+
+### GET request to get all wafer pads-external
+GET http://172.20.4.206/api/map/2
 Accept: application/json
 
 ### GET request test
