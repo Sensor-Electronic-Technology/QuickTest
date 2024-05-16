@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <LangVersion>12</LangVersion>
+        <Nullable>enable</Nullable>
+        <UseWindowsForms>true</UseWindowsForms>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Excel-DNA" Version="1.8.0" />
+      <PackageReference Include="Excel-DNA.Interop" Version="15.0.1" />
+      <PackageReference Include="Excel-DNA.Lib" Version="1.8.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\QuickTest.Data\QuickTest.Data.csproj" />
+    </ItemGroup>
+
+</Project>
