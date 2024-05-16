@@ -26,8 +26,8 @@ public class WaferDataService {
         return this._waferPadCollection.Find(e=>e.WaferSize==waferSize).ToListAsync();
     }
 
-    public async Task<List<WaferPad>> GetWaferPads(List<string> pads) {
-        var p= await this._waferPadCollection.Find(e=>pads.Contains(e.Identifier!)).ToListAsync();
+    public async Task<IEnumerable<WaferPad>> GetWaferPads(List<string> pads) {
+        var p = await this._waferPadCollection.Find(e => pads.Contains(e.Identifier!)).ToListAsync();
         return p ?? Enumerable.Empty<WaferPad>().ToList();
     }
     
@@ -38,7 +38,7 @@ public class WaferDataService {
     public Task<List<Pad>?> GetMap(WaferSize waferSize) {
         return this._waferPadCollection.Find(e => e.WaferSize == waferSize && e.SvgObject!=null).Project(e => 
                 new Pad() {
-                    Identifier = e.Identifier, X = e.SvgObject.X, Y = e.SvgObject.Y, Radius = e.SvgObject.Radius
+                    Identifier = e.Identifier, X = e.SvgObject!.X, Y = e.SvgObject!.Y, Radius = e.SvgObject!.Radius
                 })
             .ToListAsync();
     }

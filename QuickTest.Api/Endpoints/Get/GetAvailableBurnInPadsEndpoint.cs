@@ -3,6 +3,7 @@ using QuickTest.Data.Constants;
 using QuickTest.Data.Contracts.Requests.Get;
 using QuickTest.Data.Contracts.Responses;
 using QuickTest.Data.Contracts.Responses.Get;
+using QuickTest.Data.DataTransfer;
 using QuickTest.Data.Models.Wafers;
 using QuickTest.Infrastructure.Services;
 
@@ -27,9 +28,9 @@ public class GetAvailableBurnInPadsEndpoint:Endpoint<GetAvailableBurnInPadsReque
 
         var testedPads = await this._qtDataService.GetAvailableBurnInPads(req.WaferId);
         if (testedPads.Any()) {
-            List<WaferPad> pads = await this._waferDataService.GetWaferPads(testedPads);
-                var results = pads.Select(e => new WaferPadDto() {
-                    Identifier = e.Identifier, WaferSize = e.WaferSize, SvgObject = e.SvgObject
+            var pads = await this._waferDataService.GetWaferPads(testedPads);
+                var results = pads.Select(e => new Pad() {
+                    Identifier = e.Identifier, X = e.SvgObject!.X, Y = e.SvgObject!.Y, Radius = e.SvgObject!.Radius
                 }).ToList();
                 await SendAsync(new GetAvailableBurnInPadsResponse(){Pads=results}, cancellation: ct);
         }
