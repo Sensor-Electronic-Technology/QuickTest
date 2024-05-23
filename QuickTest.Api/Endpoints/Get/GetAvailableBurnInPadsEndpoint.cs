@@ -25,7 +25,6 @@ public class GetAvailableBurnInPadsEndpoint:Endpoint<GetAvailableBurnInPadsReque
         if (string.IsNullOrEmpty(req.WaferId)) {
             ThrowError("WaferId cannot be null or empty");
         }
-
         var testedPads = await this._qtDataService.GetAvailableBurnInPads(req.WaferId);
         if (testedPads.Any()) {
             var pads = await this._waferDataService.GetWaferPads(testedPads);

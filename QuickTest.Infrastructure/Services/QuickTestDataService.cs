@@ -219,4 +219,9 @@ public class QuickTestDataService {
             .ToListAsync();
         return pads ?? Enumerable.Empty<string>().ToList();
     }
+
+    public async Task<List<string>> GetQuickTestList(DateTime start) {
+        var waferList=await this._qtCollection.Find(e=>e.InitialTimeStamp>start).Project(e=>e.WaferId).ToListAsync();
+        return waferList ?? Enumerable.Empty<string>().ToList();
+    }
 }
