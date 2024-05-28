@@ -98,7 +98,7 @@ public class QuickTestDataService {
     public async Task<ErrorOr<bool>> WaferExists(string waferId) {
         var result =
             await this._epiDataClient.GetFromJsonAsync<CheckWaferExistsResponse>(
-                $"{ApiPaths.CheckWaferExistsEndpoint}{waferId}");
+                $"{ApiPaths.CheckWaferExistsPath}{waferId}");
         if (result == null) {
             this._logger.LogError("Error checking wafer exists, Null return value");
             return Error.Failure(description:"Failed to check EpiDatabase for wafer existence. Result was null");

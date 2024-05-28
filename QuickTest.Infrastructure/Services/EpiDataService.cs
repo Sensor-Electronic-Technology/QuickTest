@@ -24,14 +24,14 @@ public class EpiDataService {
     }*/
     
     public async Task<LedWaferDto?> GetWaferById(string waferId) {
-        var response=await this._epiDataClient.GetFromJsonAsync<GetLedWaferResponse>($"{ApiPaths.GetLedWaferEndpoint}{waferId}");
+        var response=await this._epiDataClient.GetFromJsonAsync<GetLedWaferResponse>($"{ApiPaths.GetLedWaferPath}{waferId}");
         return response?.LedWafer ?? null;
     }
 
     public async Task<List<string>?> GetLedWafersSince(DateTime growthDate) {
         var requestDateTime = new GetLedWafersSinceRequest() { GrowthDate = growthDate };
         var response = await this._epiDataClient.GetFromJsonAsync<GetLedWafersSinceResponse>(
-                $"{ApiPaths.GetLedWafersSinceEndpoint}{requestDateTime}");
+                $"{ApiPaths.GetLedWafersSincePath}{requestDateTime}");
         /*var response = await this._epiDataClient.GetFromJsonAsync<GetLedWafersSinceResponse>(
             $"{ApiPaths.GetLedWafersSinceEndpoint}{requestDateTime.GrowthDate:yyyy-MM-ddTHH:mm:ss.fffZ}");*/
         return response?.LedWafers.ToList();
