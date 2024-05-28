@@ -21,11 +21,8 @@ using QuickTest.Infrastructure.Services;
 
 //await Migrate();
 
-
-
 /*QuickTestDataService service=new(clientWork,"quick_test_db");
 var waferList=await service.GetWaferList();*/
-
 
 //Console.WriteLine($"Wafer Count: {waferList.Count}");
 //await CreateWaferList();
@@ -166,8 +163,6 @@ async Task CreateHelperCollections() {
 
 }
 
-
-
 async Task GetInitialResults() {
     var clientWork=new MongoClient("mongodb://172.20.3.41:27017");
     var database=clientWork.GetDatabase("quick_test_db");
@@ -272,9 +267,6 @@ async Task GetWaferListV1() {
     var waferList=await qtCollection.Find(e=>e.WaferId!=null).Project(e=>e.WaferId).ToListAsync();
     await waferCollection.InsertManyAsync(waferList.Select(e=>new Wafer(){WaferId = e ?? "not set"}));
 }*/
-
-
-
 
 async Task<(QuickTestResult? qt,List<QtMeasurement>? initMeas,List<QtMeasurement>? finalMeas,List<Spectrum>? initSpect,List<Spectrum>? finalSpect)> CreateQuickTestResult(EpiContext context, string waferId) {
     var qtId = ObjectId.GenerateNewId();
@@ -958,7 +950,6 @@ async Task<List<Spectrum>?> CreateFinalSpectrum(EpiContext context, string wafer
     }
     return null;
 }
-
 
 async Task PrintProperties() {
     EpiContext context = new();

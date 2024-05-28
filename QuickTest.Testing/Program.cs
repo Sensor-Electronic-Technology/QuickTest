@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
 using EpiData.Data.Models.Epi.Enums;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using QuickTest.Data.Constants;
 using QuickTest.Data.Contracts.Requests.Get;
@@ -17,7 +18,44 @@ using QuickTest.Infrastructure.Services;
 
 
 //await CreateWaferPads();
-await CreateFourInchWaferPads();
+//await CreateFourInchWaferPads();
+
+await CreateWaferMaps();
+
+async Task CreateWaferMaps() {
+    var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
+    WaferDataService waferDataService = new WaferDataService(mongoClient);
+
+    var twoInPads = await waferDataService.GetPads(WaferSize.TwoInch);
+    var fourInPads = await waferDataService.GetPads(WaferSize.FourInch);
+    
+    WaferMap twoInMap = new WaferMap() {
+        _id = ObjectId.GenerateNewId(),
+        WaferSize = WaferSize.TwoInch,
+        SvgWidth = 826,
+        SvgHeight = 810,
+        ImageWidth = 426,
+        ImageHeight = 410,
+        WaferMapPath = "images/WaferMask2in.png",
+        MapPads = twoInPads
+    };
+    twoInMap.ViewBoxString = $"0 0 {twoInMap.SvgWidth} {twoInMap.SvgHeight}";
+
+    WaferMap fourInMap = new WaferMap() {
+        _id = ObjectId.GenerateNewId(),
+        WaferSize = WaferSize.FourInch,
+        SvgWidth = 851,
+        SvgHeight = 852,
+        ImageWidth = 451,
+        ImageHeight = 452,
+        WaferMapPath = "images/Wafer4Inch.PNG",
+        MapPads = fourInPads,
+    };
+    fourInMap.ViewBoxString = $"0 0 {fourInMap.SvgWidth} {fourInMap.SvgHeight}";
+    await waferDataService.CreateWaferMap(twoInMap);
+    await waferDataService.CreateWaferMap(fourInMap);
+    Console.WriteLine("Check Database");
+}
 
 
 async Task GetWaferList() {

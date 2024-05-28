@@ -21,9 +21,9 @@ public class GetMapEndpoint:Endpoint<GetMapRequest, GetMapResponse>{
     
     public override async Task HandleAsync(GetMapRequest request, CancellationToken cancellationToken) {
         if (WaferSize.TryFromValue(request.WaferSize, out var waferSize)) {
-            var pads = await this._waferDataService.GetMap(waferSize);
-            if (pads != null) {
-                await SendAsync(new GetMapResponse(){Pads=pads},cancellation: cancellationToken);
+            var waferMap = await this._waferDataService.GetMap(waferSize);
+            if (waferMap != null) {
+                await SendAsync(new GetMapResponse(){WaferMap=waferMap.WaferMapDto()},cancellation: cancellationToken);
             }else {
                 await SendNotFoundAsync(cancellationToken);
             }
