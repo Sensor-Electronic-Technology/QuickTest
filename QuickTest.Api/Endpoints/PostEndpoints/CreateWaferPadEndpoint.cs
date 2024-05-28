@@ -25,7 +25,7 @@ public class CreateWaferPadEndpoint:Endpoint<CreateWaferPadRequest,CreateWaferPa
     
     public override async Task HandleAsync(CreateWaferPadRequest request, CancellationToken cancellationToken) {
         WaferPad entity = Map.ToEntity(request);
-        var exists = await this._waferDataService.Exists(identifier: entity.Identifier);
+        var exists = await this._waferDataService.Exists(entity.WaferSize,identifier: entity.Identifier);
         if (exists) {
             this._logger.LogError("Attempted to create WaferPad with an Identifier that already exists");
             AddError("Identifier already exists");

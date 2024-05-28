@@ -46,17 +46,17 @@ public class WaferDataService {
     public async Task<ErrorOr<WaferPad>> CreateWaferPad(WaferPad pad) {
         pad._id = ObjectId.GenerateNewId();
         await this._waferPadCollection.InsertOneAsync(pad);
-        var check = await this.Exists(id: pad._id);
+        var check = await this.Exists(pad.WaferSize,id: pad._id);
         return check ? pad : Error.Failure(description: "Failed to create wafer pad");
     }
     
-    public async Task<bool> Exists(string? identifier=default, ObjectId? id=default) {
+    public async Task<bool> Exists(WaferSize size,string? identifier=default, ObjectId? id=default) {
         if (!string.IsNullOrEmpty(identifier)) {
-            var check=await this._waferPadCollection.Find(e=>e.Identifier==identifier).FirstOrDefaultAsync();
+            var check=await this._waferPadCollection.Find(e=>e.Identifier==identifier && e.WaferSize==size).FirstOrDefaultAsync();
             return check != null;
         }
         if (id != null) {
-            var check=await this._waferPadCollection.Find(e=>e._id==id).FirstOrDefaultAsync();
+            var check=await this._waferPadCollection.Find(e=>e._id==id && e.WaferSize==size).FirstOrDefaultAsync();
             return check != null;
         }
         return false;
