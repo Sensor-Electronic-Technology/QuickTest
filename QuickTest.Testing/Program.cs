@@ -16,8 +16,8 @@ using QuickTest.Data.Contracts.Responses.Post;
 using QuickTest.Infrastructure.Services;
 
 
-await CreateWaferPads();
-//await CreateFourInchWaferPads();
+//await CreateWaferPads();
+await CreateFourInchWaferPads();
 
 
 async Task GetWaferList() {
