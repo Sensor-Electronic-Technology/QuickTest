@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
 using EpiData.Data.Models.Epi.Enums;
@@ -91,6 +92,22 @@ async Task TestClientGetManyWafers() {
 }*/
 
 await TestCheck();
+//await GetWaferList();
+async Task GetWaferList() {
+    HttpClient client = new HttpClient();
+    client.BaseAddress = new Uri("http://172.20.4.206");
+    var start = new DateTime(2023, 1, 1);
+    Console.WriteLine("Sending request...");
+    var waferListResponse=await client.GetFromJsonAsync<GetQuickTestListResponse>($"{QtApiPaths.GetQuickTestListSincePath}{start.ToString("yyyy-MM-dd",CultureInfo.InvariantCulture)}");
+    if (waferListResponse != null) {
+        Console.WriteLine("Found Wafers");
+        foreach (var waferId in waferListResponse.WaferList) {
+            Console.WriteLine(waferId);
+        }
+    } else {
+        Console.WriteLine("Error: Response was null");
+    }
+}
 
 
 async Task TestCheck() {
@@ -98,7 +115,7 @@ async Task TestCheck() {
     client.BaseAddress = new Uri("http://localhost:5260");
     var checkRequest = new CheckQuickTestRequest() { WaferId = "B01-3482-10", MeasurementType = 0 };
     //client.PostAsJsonAsync($"{QtApiPaths.CheckQuickTestPath}{checkRequest}", checkRequest);
-    var response=await client.GetAsync($"{QtApiPaths.CheckQuickTestPath}/{checkRequest.WaferId}/{checkRequest.MeasurementType}");
+    var response=await client.GetAsync($"{QtApiPaths.CheckQuickTestPath}{checkRequest.WaferId}/{checkRequest.MeasurementType}");
     Console.WriteLine(response.ToString());
 }
 

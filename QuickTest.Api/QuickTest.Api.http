@@ -1,4 +1,5 @@
 @QuickTest.Api_HostAddress = http://localhost:5260
+@Remote.Api_HostAddress = http://172.20.4.206
 
 ### GET request to get initial data
 GET {{QuickTest.Api_HostAddress}}/api/qt_results/B03-2615-07
@@ -10,6 +11,10 @@ Accept: text/plain
 
 ### GET request to get initial data
 GET {{QuickTest.Api_HostAddress}}/api/results/all/excel/B01-3766-06
+Accept: text/plain
+
+### GET request for quick-test list
+GET {{Remote.Api_HostAddress}}/api/quick-tests/list-since/5-1-2024
 Accept: text/plain
 
 ### GET request to get initial data
@@ -33,5 +38,5 @@ GET {{QuickTest.Api_HostAddress}}/api/results/excel/B01-3277-28?1
 Accept: application/json
 
 ### GET request test
-GET {{QuickTest.Api_HostAddress}}/api/quick-test/exists/B01-3277-28
+GET {{Remote.Api_HostAddress}}/api/quick-test/exists/B01-3277-28
 Accept: application/json
