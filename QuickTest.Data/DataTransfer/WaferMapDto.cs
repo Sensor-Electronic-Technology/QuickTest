@@ -10,5 +10,5 @@ public class WaferMapDto {
     public int SvgWidth { get; set; }
     public int SvgHeight { get; set; }
     public string? WaferMapPath { get; set; }
-    public List<Pad>? MapPads { get; set; }
+    public List<Pad> MapPads { get; set; } = [];
 }

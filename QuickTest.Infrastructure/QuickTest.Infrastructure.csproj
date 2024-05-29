@@ -23,4 +23,20 @@
     <ItemGroup>
       <ProjectReference Include="..\QuickTest.Data\QuickTest.Data.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Remove="bin\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="bin\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="bin\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="bin\**" />
+    </ItemGroup>
 </Project>

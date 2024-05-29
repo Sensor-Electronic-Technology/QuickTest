@@ -13,13 +13,12 @@ public class WaferMap {
     public int SvgWidth { get; set; }
     public int SvgHeight { get; set; }
     public string? WaferMapPath { get; set; }
-    public List<Pad>? MapPads { get; set; }
+    public List<ObjectId> PadIds { get; set; } = [];
 
     public WaferMapDto WaferMapDto() {
         return new WaferMapDto() {
             ImageHeight = this.ImageHeight,
             ImageWidth = this.ImageWidth,
-            MapPads = this.MapPads,
             SvgHeight = this.SvgHeight,
             SvgWidth = this.SvgWidth,
             ViewBoxString = this.ViewBoxString,

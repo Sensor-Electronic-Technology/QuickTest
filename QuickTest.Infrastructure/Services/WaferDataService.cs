@@ -47,8 +47,21 @@ public class WaferDataService {
         return this._waferPadCollection.Find(e=>e.WaferSize==WaferSize.TwoInch).ToListAsync();
     }*/
 
-    public async Task<WaferMap?> GetMap(WaferSize waferSize) {
-        return await this._waferMapCollection.Find(e => e.WaferSize == waferSize).FirstOrDefaultAsync();
+    public async Task<WaferMapDto?> GetMap(WaferSize waferSize) { 
+        var waferMap=await this._waferMapCollection.Find(e => e.WaferSize == waferSize).FirstOrDefaultAsync();
+        if (waferMap != null) {
+            var pads=await this._waferPadCollection.Find(e => waferMap.PadIds.Contains(e._id)).Project(e=>new Pad() {
+                Identifier = e.Identifier,
+                X=e.SvgObject.X,
+                Y=e.SvgObject.Y,
+                Radius = e.SvgObject.Radius
+            }).ToListAsync();
+            var waferMapDto=waferMap.WaferMapDto();
+            waferMapDto.MapPads = pads;
+            return waferMapDto;
+        } else {
+            return null;
+        }
     }
 
     public Task<List<Pad>> GetPads(WaferSize waferSize) {
@@ -58,8 +71,13 @@ public class WaferDataService {
         })
         .ToListAsync();
     }
+    
+    public Task<List<WaferPad>> GetPadsOther(WaferSize waferSize) {
+        return this._waferPadCollection.Find(e => e.WaferSize == waferSize && e.SvgObject!=null)
+            .ToListAsync();
+    }
 
-public async Task<ErrorOr<WaferPad>> CreateWaferPad(WaferPad pad) {
+    public async Task<ErrorOr<WaferPad>> CreateWaferPad(WaferPad pad) {
         pad._id = ObjectId.GenerateNewId();
         await this._waferPadCollection.InsertOneAsync(pad);
         var check = await this.Exists(pad.WaferSize,id: pad._id);

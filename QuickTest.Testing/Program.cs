@@ -13,21 +13,40 @@ using QuickTest.Data.Models.Wafers;
 using QuickTest.Data.Models.Wafers.Enums;
 using QuickTest.Data.Contracts.Requests.Post;
 using QuickTest.Data.Contracts.Responses.Get;
-using QuickTest.Data.Contracts.Responses.Post;
 using QuickTest.Infrastructure.Services;
 
 
-//await CreateWaferPads();
-//await CreateFourInchWaferPads();
+/*await CreateWaferPads();
+await CreateFourInchWaferPads();
 
-await CreateWaferMaps();
+await CreateWaferMaps();*/
+//await GetWaferPadsTest();
+await GetNewMap();
+
+async Task GetNewMap() {
+    var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
+    WaferDataService waferDataService = new WaferDataService(mongoClient);
+    var waferMap=await waferDataService.GetMap(WaferSize.TwoInch);
+    foreach (var pad in waferMap.MapPads) {
+        Console.WriteLine($"Id: {pad.Identifier}");
+    }
+}
+
+async Task GetWaferPadsTest() {
+    var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
+    WaferDataService waferDataService = new WaferDataService(mongoClient);
+    var waferPads=await waferDataService.GetPadsOther(WaferSize.TwoInch);
+    foreach (var pad in waferPads) {
+        Console.WriteLine($"Id: {pad.Identifier} Size: {pad.WaferSize.Name}");
+    }
+}
 
 async Task CreateWaferMaps() {
     var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
     WaferDataService waferDataService = new WaferDataService(mongoClient);
 
-    var twoInPads = await waferDataService.GetPads(WaferSize.TwoInch);
-    var fourInPads = await waferDataService.GetPads(WaferSize.FourInch);
+    var twoInPads = await waferDataService.GetPadsOther(WaferSize.TwoInch);
+    var fourInPads = await waferDataService.GetPadsOther(WaferSize.FourInch);
     
     WaferMap twoInMap = new WaferMap() {
         _id = ObjectId.GenerateNewId(),
@@ -37,7 +56,7 @@ async Task CreateWaferMaps() {
         ImageWidth = 426,
         ImageHeight = 410,
         WaferMapPath = "images/WaferMask2in.png",
-        MapPads = twoInPads
+        PadIds = twoInPads.Select(e=>e._id).ToList()
     };
     twoInMap.ViewBoxString = $"0 0 {twoInMap.SvgWidth} {twoInMap.SvgHeight}";
 
@@ -49,14 +68,13 @@ async Task CreateWaferMaps() {
         ImageWidth = 451,
         ImageHeight = 452,
         WaferMapPath = "images/Wafer4Inch.PNG",
-        MapPads = fourInPads,
+        PadIds = fourInPads.Select(e=>e._id).ToList()
     };
     fourInMap.ViewBoxString = $"0 0 {fourInMap.SvgWidth} {fourInMap.SvgHeight}";
     await waferDataService.CreateWaferMap(twoInMap);
     await waferDataService.CreateWaferMap(fourInMap);
     Console.WriteLine("Check Database");
 }
-
 
 async Task GetWaferList() {
     HttpClient client = new HttpClient();
@@ -74,7 +92,6 @@ async Task GetWaferList() {
     }
 }
 
-
 async Task TestCheck() {
     HttpClient client = new HttpClient();
     client.BaseAddress = new Uri("http://localhost:5260");
@@ -83,7 +100,6 @@ async Task TestCheck() {
     var response=await client.GetAsync($"{QtApiPaths.CheckQuickTestPath}{checkRequest.WaferId}/{checkRequest.MeasurementType}");
     Console.WriteLine(response.ToString());
 }
-
 
 async Task GetWaferPad() {
     HttpClient client = new HttpClient();
@@ -102,7 +118,6 @@ async Task DeleteWaferPads() {
     var client = new MongoClient("mongodb://172.20.3.41:27017/");
     var database = client.GetDatabase("quick_test_db");
     var collection=database.GetCollection<WaferPad>("wafer_pads");
-    
 }
 
 async Task CreateFourInchWaferPads() {
@@ -195,7 +210,7 @@ async Task CreateWaferPads() {
     
     List<CreateWaferPadRequest> centerPads = new List<CreateWaferPadRequest>() {
         new CreateWaferPadRequest() {
-            PadLocation = PadLocation.PadLocationR,
+            PadLocation = PadLocation.PadLocationA,
             PadNumber = 0,
             PadMapDefinition = new PadMapDefinition() {
                 X=368,
@@ -245,8 +260,8 @@ async Task CreateWaferPads() {
             PadLocation = PadLocation.PadLocationL,
             PadNumber = 1,
             PadMapDefinition = new PadMapDefinition() {
-                X=121,
-                Y=369,
+                X=143,
+                Y=365,
                 Radius=7,
             },
             WaferArea = WaferArea.Edge,
@@ -256,8 +271,8 @@ async Task CreateWaferPads() {
             PadLocation = PadLocation.PadLocationL,
             PadNumber = 2,
             PadMapDefinition = new PadMapDefinition() {
-                X=136,
-                Y=368,
+                X=160,
+                Y=365,
                 Radius=7,
             },
             WaferArea = WaferArea.Edge,
@@ -267,8 +282,8 @@ async Task CreateWaferPads() {
             PadLocation = PadLocation.PadLocationL,
             PadNumber = 3,
             PadMapDefinition = new PadMapDefinition() {
-                X=153,
-                Y=370,
+                X=178,
+                Y=365,
                 Radius=7,
             },
             WaferArea = WaferArea.Edge,
@@ -278,8 +293,8 @@ async Task CreateWaferPads() {
             PadLocation = PadLocation.PadLocationL,
             PadNumber = 4,
             PadMapDefinition = new PadMapDefinition() {
-                X=122,
-                Y=143,
+                X=141,
+                Y=441,
                 Radius=7,
             },
             WaferArea = WaferArea.Edge,
@@ -289,8 +304,8 @@ async Task CreateWaferPads() {
             PadLocation = PadLocation.PadLocationL,
             PadNumber = 5,
             PadMapDefinition = new PadMapDefinition() {
-                X=136,
-                Y=433,
+                X=160,
+                Y=442,
                 Radius=7,
             },
             WaferArea = WaferArea.Edge,
@@ -300,8 +315,8 @@ async Task CreateWaferPads() {
             PadLocation = PadLocation.PadLocationL,
             PadNumber = 6,
             PadMapDefinition = new PadMapDefinition() {
-                X=152,
-                Y=433,
+                X=179,
+                Y=442,
                 Radius=7,
             },
             WaferArea = WaferArea.Edge,

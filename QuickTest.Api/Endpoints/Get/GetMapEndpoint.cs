@@ -23,7 +23,7 @@ public class GetMapEndpoint:Endpoint<GetMapRequest, GetMapResponse>{
         if (WaferSize.TryFromValue(request.WaferSize, out var waferSize)) {
             var waferMap = await this._waferDataService.GetMap(waferSize);
             if (waferMap != null) {
-                await SendAsync(new GetMapResponse(){WaferMap=waferMap.WaferMapDto()},cancellation: cancellationToken);
+                await SendAsync(new GetMapResponse(){WaferMap=waferMap},cancellation: cancellationToken);
             }else {
                 await SendNotFoundAsync(cancellationToken);
             }

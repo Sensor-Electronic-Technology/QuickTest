@@ -1,8 +1,8 @@
-﻿cd C:\Users\aelme\RiderProjects\QuickTest\QuickTest.Data\
+﻿cd $env:USERPROFILE\RiderProjects\QuickTest\QuickTest.Data\
 
 [int]$type=0 <#0=patch,1=minor,2=major#>
 
-$csprojfilename = "C:\Users\aelme\RiderProjects\QuickTest\QuickTest.Data\QuickTest.Data.csproj"
+$csprojfilename = $env:USERPROFILE+"\RiderProjects\QuickTest\QuickTest.Data\QuickTest.Data.csproj"
 "Project file to update " + $csprojfilename
 [xml]$csprojcontents = Get-Content -Path $csprojfilename;
 "Current version number is " + $csprojcontents.Project.PropertyGroup.Version
@@ -21,13 +21,10 @@ switch ($type) {
 
 $newversionNumber = $major.ToString() + "." + $minor.ToString() + "." + $patch.ToString()
 "New version number is " + $newversionNumber
-$outputPath="C:/Users/aelme/RiderProjects/QuickTest/QuickTest.Data/bin/Release/QuickTest.Data." + $newversionNumber + ".nupkg"
+$outputPath=$env:USERPROFILE+"\RiderProjects\QuickTest\QuickTest.Data\bin\Release\QuickTest.Data." + $newversionNumber + ".nupkg"
 $csprojcontents.Project.PropertyGroup.Version = $newversionNumber
 $csprojcontents.Save($csprojfilename)
 dotnet pack $csprojfilename --configuration Release
-<#Push Local Server#>
-<#dotnet nuget push -s http://172.20.4.15:8081/v3/index.json $outputPath#>
-<#Push Github#>
 $json = dotnet user-secrets list --json
 $secrets = $json | % { $_ -replace '//(BEGIN|END)' } | ConvertFrom-Json
 dotnet nuget push $outputPath --api-key $secrets.'GithubPackage:Token' --source "github"
