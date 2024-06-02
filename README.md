@@ -1,0 +1,1 @@
+[![Api Release](https://github.com/Sensor-Electronic-Technology/QuickTest/actions/workflows/api-release.yml/badge.svg)](https://github.com/Sensor-Electronic-Technology/QuickTest/actions/workflows/api-release.yml)
