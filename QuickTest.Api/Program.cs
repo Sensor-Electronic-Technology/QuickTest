@@ -13,7 +13,7 @@ string connectionString = "";
 switch (hostType) {
     case nameof(HostType.Pi):
         connectionString = builder.Configuration.GetConnectionString("PiConnection") ??
-                           "mongodb://192.168.68.112:27017";
+                           "mongodb://192.168.68.111:27017";
         break;
     case nameof(HostType.Windows):
     case nameof(HostType.Linux):

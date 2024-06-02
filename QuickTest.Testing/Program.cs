@@ -13,6 +13,8 @@ using QuickTest.Data.Models.Wafers;
 using QuickTest.Data.Models.Wafers.Enums;
 using QuickTest.Data.Contracts.Requests.Post;
 using QuickTest.Data.Contracts.Responses.Get;
+using QuickTest.Data.Models;
+using QuickTest.Data.Models.Measurements;
 using QuickTest.Infrastructure.Services;
 
 
@@ -21,7 +23,63 @@ await CreateFourInchWaferPads();
 
 await CreateWaferMaps();*/
 //await GetWaferPadsTest();
-await GetNewMap();
+//await GetNewMap();
+
+await CloneDatabase();
+
+
+async Task CloneDatabase(){
+    var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
+    var database = mongoClient.GetDatabase("quick_test_db");
+    
+    var pimongoClient = new MongoClient("mongodb://192.168.68.111:27017/");
+    var pidatabase = pimongoClient.GetDatabase("quick_test_db");
+    
+    var qtCollection=database.GetCollection<QuickTestResult>("quick_test");
+    var initMeasureCollection=database.GetCollection<QtMeasurement>("init_measurements");
+    var finalMeasureCollection=database.GetCollection<QtMeasurement>("final_measurements");
+    var initSpectrumCollection=database.GetCollection<Spectrum>("init_spectrum");
+    var finalSpectrumCollection=database.GetCollection<Spectrum>("final_spectrum");
+    var probeStationCollection=database.GetCollection<ProbeStation>("probe_stations");
+    var waferPadCollection = database.GetCollection<WaferPad>("wafer_pads");
+    var waferMapCollection = database.GetCollection<WaferMap>("wafer_maps");
+    
+    var piQtCollection=pidatabase.GetCollection<QuickTestResult>("quick_test");
+    var piInitMeasureCollection=pidatabase.GetCollection<QtMeasurement>("init_measurements");
+    var piFinalMeasureCollection=pidatabase.GetCollection<QtMeasurement>("final_measurements");
+    var piInitSpectrumCollection=pidatabase.GetCollection<Spectrum>("init_spectrum");
+    var piFinalSpectrumCollection=pidatabase.GetCollection<Spectrum>("final_spectrum");
+    var piProbeStationCollection=pidatabase.GetCollection<ProbeStation>("probe_stations");
+    var piWaferPadCollection = pidatabase.GetCollection<WaferPad>("wafer_pads");
+    var piWaferMapCollection = pidatabase.GetCollection<WaferMap>("wafer_maps");
+
+    Console.WriteLine("Collecting Data...");
+
+    var qtList=qtCollection.AsQueryable().Take(1000).ToList();
+    var qtListIds=qtList.Select(e => e._id);
+    var initMeasureList = await initMeasureCollection.Find(e => qtListIds.Contains(e.QuickTestResultId)).ToListAsync();
+    var finalMeasureList = await finalMeasureCollection.Find(e => qtListIds.Contains(e.QuickTestResultId)).ToListAsync();
+    var initSpectMeasureList = await initSpectrumCollection.Find(e => qtListIds.Contains(e.QuickTestResultId)).ToListAsync();
+    var finalSpectMeasureList = await finalSpectrumCollection.Find(e => qtListIds.Contains(e.QuickTestResultId)).ToListAsync();
+    var probeStationList = await probeStationCollection.Find(_=>true).ToListAsync();
+    var waferPadList = await waferPadCollection.Find(_=>true).ToListAsync();
+    var waferMapList = await waferMapCollection.Find(_=>true).ToListAsync();
+
+    Console.WriteLine("Cloning Data...");
+    
+    await piQtCollection.InsertManyAsync(qtList);
+    await piInitMeasureCollection.InsertManyAsync(initMeasureList);
+    await piFinalMeasureCollection.InsertManyAsync(finalMeasureList);
+    await piInitSpectrumCollection.InsertManyAsync(initSpectMeasureList);
+    await piFinalSpectrumCollection.InsertManyAsync(finalSpectMeasureList);
+    await piProbeStationCollection.InsertManyAsync(probeStationList);
+    await piWaferPadCollection.InsertManyAsync(waferPadList);
+    await piWaferMapCollection.InsertManyAsync(waferMapList);
+
+    Console.WriteLine("Check Pi Database");
+
+
+}
 
 async Task GetNewMap() {
     var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
