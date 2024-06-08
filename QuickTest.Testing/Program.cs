@@ -6,6 +6,7 @@ using System.Text.Json;
 using EpiData.Data.Models.Epi.Enums;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using QuickTest.Data.Constants;
 using QuickTest.Data.Contracts.Requests.Get;
 using QuickTest.Data.Contracts.Responses;
@@ -55,7 +56,7 @@ async Task CloneDatabase(){
 
     Console.WriteLine("Collecting Data...");
 
-    var qtList=qtCollection.AsQueryable().Take(1000).ToList();
+    var qtList = await qtCollection.Find(e => e.InitialTimeStamp > DateTime.Now.AddMonths(-1)).ToListAsync();
     var qtListIds=qtList.Select(e => e._id);
     var initMeasureList = await initMeasureCollection.Find(e => qtListIds.Contains(e.QuickTestResultId)).ToListAsync();
     var finalMeasureList = await finalMeasureCollection.Find(e => qtListIds.Contains(e.QuickTestResultId)).ToListAsync();
