@@ -2,7 +2,7 @@
 using QuickTest.Data.Models.Wafers;
 using QuickTest.Data.Models.Wafers.Enums;
 
-namespace QuickTest.Data.Contracts.Responses;
+namespace QuickTest.Data.DataTransfer;
 
 public class WaferPadDto {
     public string? Identifier { get; set; }

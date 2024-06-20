@@ -3,6 +3,7 @@ using FastEndpoints;
 using QuickTest.Data.Contracts.Requests.Post;
 using QuickTest.Data.Contracts.Responses;
 using QuickTest.Data.Contracts.Responses.Post;
+using QuickTest.Data.DataTransfer;
 using QuickTest.Data.Models.Wafers;
 
 namespace QuickTest.Data.Mappers;

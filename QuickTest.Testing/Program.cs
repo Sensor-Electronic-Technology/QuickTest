@@ -14,6 +14,7 @@ using QuickTest.Data.Models.Wafers;
 using QuickTest.Data.Models.Wafers.Enums;
 using QuickTest.Data.Contracts.Requests.Post;
 using QuickTest.Data.Contracts.Responses.Get;
+using QuickTest.Data.DataTransfer;
 using QuickTest.Data.Models;
 using QuickTest.Data.Models.Measurements;
 using QuickTest.Infrastructure.Services;
@@ -56,7 +57,7 @@ async Task CloneDatabase(){
 
     Console.WriteLine("Collecting Data...");
 
-    var qtList = await qtCollection.Find(e => e.InitialTimeStamp > DateTime.Now.AddMonths(-1)).ToListAsync();
+    var qtList = await qtCollection.Find(e => e.InitialTimeStamp > DateTime.Now.AddMonths(-2)).ToListAsync();
     var qtListIds=qtList.Select(e => e._id);
     var initMeasureList = await initMeasureCollection.Find(e => qtListIds.Contains(e.QuickTestResultId)).ToListAsync();
     var finalMeasureList = await finalMeasureCollection.Find(e => qtListIds.Contains(e.QuickTestResultId)).ToListAsync();
