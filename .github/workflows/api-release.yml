@@ -6,6 +6,7 @@ on:
     - 'QuickTest.Api/**'
     - 'QuickTest.Infrastructure/**'
     - '.github/workflows/api-release.yml'
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,7 +27,7 @@ jobs:
         context: .
         file: ./QuickTest.Api/Dockerfile
         push: true
-        tags: ${{secrets.Docker_Username}}/quick-test-api:dev
+        tags: ${{secrets.Docker_Username}}/quick-test-api:latest
   deploy:
     needs: build
     runs-on:
