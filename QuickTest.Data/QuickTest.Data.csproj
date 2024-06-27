@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageId>QuickTest.Data</PackageId>
-    <Version>1.0.18</Version>
+    <Version>1.0.19</Version>
     <Authors>Andrew Elmendorf</Authors>
     <Company>Sensor Electronic Technology</Company>
     <PackageDescription>Data for QuickTest</PackageDescription>

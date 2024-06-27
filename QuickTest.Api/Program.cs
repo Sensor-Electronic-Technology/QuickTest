@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-var hostType = builder.Configuration["HostType"];
+/*var hostType = builder.Configuration["HostType"];
 string connectionString = "";
 switch (hostType) {
     case nameof(HostType.Pi):
@@ -21,14 +21,13 @@ switch (hostType) {
         connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
                            "mongodb://172.20.3.41:27017";
         break;
-}
-
+}*/
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "mongodb://172.20.3.41:27017";
 builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection(nameof(DatabaseSettings)));
 builder.Services.AddSingleton<IMongoClient>(new MongoClient(connectionString));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddFastEndpoints(o=>o.IncludeAbstractValidators = true);
-builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddInfrastructure();
 var app = builder.Build();
 app.UseSwagger();

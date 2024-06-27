@@ -6,7 +6,7 @@ GET {{QuickTest.Api_HostAddress}}/api/qt_results/B03-2615-07
 Accept: text/plain
 
 ### GET request to get initial data
-GET http://172.20.4.206/api/results/all/excel/B03-2615-07/1
+GET http://172.20.4.206/api/results/all/excel/B03-2615-07?1
 Accept: text/plain
 
 ### GET request to get initial data
@@ -39,4 +39,9 @@ Accept: application/json
 
 ### GET request test
 GET {{Remote.Api_HostAddress}}/api/quick-test/exists/B01-3277-28
+Accept: application/json
+
+### GET request test
+
+GET {{Remote.Api_HostAddress}}/api/map/2
 Accept: application/json
