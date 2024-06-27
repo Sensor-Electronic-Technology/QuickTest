@@ -1,7 +1,6 @@
 ﻿using EpiData.Data.Models.Epi.Enums;
 using MongoDB.Bson;
 using QuickTest.Data.DataTransfer;
-
 namespace QuickTest.Data.Models.Wafers;
 
 public class WaferMap {

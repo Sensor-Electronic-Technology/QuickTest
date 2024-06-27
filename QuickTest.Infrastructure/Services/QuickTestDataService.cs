@@ -215,7 +215,9 @@ public class QuickTestDataService {
     }
     
     public async Task<List<string>> GetAvailableBurnInPads(string waferId) {
-        var pads= await  this._initMeasureCollection.Find(e => e.WaferId == waferId && e.Current == 20 && !string.IsNullOrEmpty(e.Pad)).Project(e => e.Pad!)
+        var pads= await  this._initMeasureCollection
+            .Find(e => e.WaferId == waferId && e.Current == 20 && !string.IsNullOrEmpty(e.Pad))
+            .Project(e => e.Pad!)
             .ToListAsync();
         return pads ?? Enumerable.Empty<string>().ToList();
     }

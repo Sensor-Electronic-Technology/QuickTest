@@ -1,6 +1,4 @@
-﻿using QuickTest.Data.Models.Wafers;
-
-namespace QuickTest.Data.DataTransfer;
+﻿namespace QuickTest.Data.DataTransfer;
 
 public class WaferMapDto {
     public int WaferSize { get; set; }

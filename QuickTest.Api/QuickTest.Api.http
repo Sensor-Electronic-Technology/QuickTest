@@ -34,7 +34,7 @@ GET http://172.20.4.206/api/map/2
 Accept: application/json
 
 ### GET request test
-GET {{QuickTest.Api_HostAddress}}/api/results/excel/B01-3277-28?1
+GET http://172.20.4.206/api/results/excel/B06-1393-?1
 Accept: application/json
 
 ### GET request test

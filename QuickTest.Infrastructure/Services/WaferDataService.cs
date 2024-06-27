@@ -15,6 +15,7 @@ namespace QuickTest.Infrastructure.Services;
 public class WaferDataService {
     private readonly IMongoCollection<WaferPad> _waferPadCollection;
     private readonly IMongoCollection<WaferMap> _waferMapCollection;
+    private readonly IMongoCollection<LvWaferMap> _labviewWaferMapCollection;
     private ILogger<WaferDataService> _logger;
 
     public WaferDataService(ILogger<WaferDataService> logger, IMongoClient mongoClient) {
@@ -22,12 +23,14 @@ public class WaferDataService {
         var database = mongoClient.GetDatabase("quick_test_db");
         this._waferPadCollection = database.GetCollection<WaferPad>("wafer_pads");
         this._waferMapCollection = database.GetCollection<WaferMap>("wafer_maps");
+        this._labviewWaferMapCollection = database.GetCollection<LvWaferMap>("lv_wafer_maps");
     }
 
     public WaferDataService(IMongoClient mongoClient) {
         var database = mongoClient.GetDatabase("quick_test_db");
         this._waferPadCollection = database.GetCollection<WaferPad>("wafer_pads");
         this._waferMapCollection = database.GetCollection<WaferMap>("wafer_maps");
+        this._labviewWaferMapCollection = database.GetCollection<LvWaferMap>("lv_wafer_maps");
     }
 
     public Task<List<WaferPad>?> GetWaferPads(WaferSize waferSize) {
@@ -46,6 +49,10 @@ public class WaferDataService {
     /*public Task<List<WaferPad>?> GetAvailableBurnInPads(WaferSize waferSize) {
         return this._waferPadCollection.Find(e=>e.WaferSize==WaferSize.TwoInch).ToListAsync();
     }*/
+    
+    public async Task<LvWaferMap?> GetLabviewWaferMap(WaferSize waferSize) {
+        return await this._labviewWaferMapCollection.Find(e => e.Size == waferSize.Value).FirstOrDefaultAsync();
+    }
 
     public async Task<WaferMapDto?> GetMap(WaferSize waferSize) { 
         var waferMap=await this._waferMapCollection.Find(e => e.WaferSize == waferSize).FirstOrDefaultAsync();

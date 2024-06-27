@@ -1,5 +1,5 @@
-﻿#FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-FROM mcr.microsoft.com/dotnet/aspnet:8.0.0-alpine3.18-arm64v8 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+#FROM mcr.microsoft.com/dotnet/aspnet:8.0.0-alpine3.18-arm64v8 AS base
 USER $APP_UID
 WORKDIR /app
 EXPOSE 80
@@ -8,7 +8,6 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["./NuGet.config", "."]
-#COPY ["./nuget.bak","./NuGet.config"]
 COPY ["QuickTest.Api/QuickTest.Api.csproj", "QuickTest.Api/"]
 RUN dotnet restore "QuickTest.Api/QuickTest.Api.csproj"
 COPY . .
