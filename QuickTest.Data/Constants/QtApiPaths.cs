@@ -4,7 +4,7 @@ public static class QtApiPaths {
     
     #region WaferPadPaths
         public static string GetMapPath => "/api/map/";
-        public static string GetLabviewWaferMap => "/api/labview/pads/";
+        public static string GetLabviewWaferMap => "/api/labview/map/";
         public static string CreateWaferPadPath => "/api/pads/create/";
         public static string GetAvailableBurnInPadsPath => "/api/pads/available/";
     #endregion
