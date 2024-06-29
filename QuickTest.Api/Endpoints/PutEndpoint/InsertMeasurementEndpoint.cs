@@ -1,7 +1,7 @@
 ﻿using FastEndpoints;
 using QuickTest.Data.Constants;
-using QuickTest.Data.Contracts.Requests.Push;
-using QuickTest.Data.Contracts.Responses.Push;
+using QuickTest.Data.Contracts.Requests.Put;
+using QuickTest.Data.Contracts.Responses.Put;
 using QuickTest.Data.Models.Measurements;
 using QuickTest.Infrastructure.Services;
 
@@ -24,11 +24,10 @@ public class InsertMeasurementEndpoint:Endpoint<InsertMeasurementRequest, Insert
         if(req.Measurement == null) {
             ThrowError("Measurement cannot be null");
         }
-        
         if (string.IsNullOrEmpty(req.Measurement.WaferId)) {
             ThrowError("WaferId cannot be null or empty");
         }
-        var result = await this._qtDataService.InsertMeasurement(new QtMeasurement() {
+        /*var result = await this._qtDataService.InsertMeasurement(new QtMeasurement() {
             MeasurementType = (MeasurementType)req.Measurement.MeasurementType,
             Current= req.Measurement.Current,
             Voltage= req.Measurement.Voltage,
@@ -37,7 +36,8 @@ public class InsertMeasurementEndpoint:Endpoint<InsertMeasurementRequest, Insert
             Knee=req.Measurement.Knee,
             Ir = req.Measurement.Ir,
             Wl= req.Measurement.Wl
-        });
+        });*/
+        var result = await this._qtDataService.InsertMeasurement(req.Measurement);
         await SendAsync(new InsertMeasurementResponse() { Success = result },cancellation:ct);
     }
 }

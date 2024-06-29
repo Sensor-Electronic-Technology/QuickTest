@@ -1,13 +1,13 @@
 ﻿using FastEndpoints;
-using QuickTest.Data.Contracts.Requests.Push;
-using QuickTest.Data.Contracts.Responses.Push;
+using QuickTest.Data.Contracts.Requests.Put;
+using QuickTest.Data.Contracts.Responses.Put;
 using QuickTest.Data.DataTransfer;
 using QuickTest.Data.Models.Measurements;
 using QuickTest.Data.Models.Wafers.Enums;
 
 namespace QuickTest.Data.Mappers;
 
-public class MeasurementMapper:Mapper<InsertMeasurementRequest,InsertMeasurementResponse,QtMeasurement?> {
+/*public class MeasurementMapper:Mapper<InsertMeasurementRequest,InsertMeasurementResponse,QtMeasurement?> {
     public override InsertMeasurementResponse FromEntity(QtMeasurement? e) {
         if (e == null) {
             return new InsertMeasurementResponse() {
@@ -43,7 +43,7 @@ public class MeasurementMapper:Mapper<InsertMeasurementRequest,InsertMeasurement
             return measurement;
         } else {
             return null;
-        }*/
+        }#1#
     }
 
     public override QtMeasurement? UpdateEntity(InsertMeasurementRequest r, QtMeasurement? e) {
@@ -71,6 +71,6 @@ public class MeasurementMapper:Mapper<InsertMeasurementRequest,InsertMeasurement
             return e;
         } else {
             return null;
-        }*/
+        }#1#
     }
-}
+}*/

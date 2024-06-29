@@ -6,7 +6,7 @@ GET {{QuickTest.Api_HostAddress}}/api/qt_results/B03-2615-07
 Accept: text/plain
 
 ### GET request to get initial data
-GET http://172.20.4.206/api/results/all/excel/B03-2615-07?1
+GET {{QuickTest.Api_HostAddress}}/api/results/all/excel/B01-3KNB01B14-14?1
 Accept: text/plain
 
 ### GET request to get initial data
@@ -30,18 +30,22 @@ GET {{QuickTest.Api_HostAddress}}/api/map/2
 Accept: application/json
 
 ### GET request to get all wafer pads-external
-GET http://172.20.4.206/api/map/2
+GET {{QuickTest.Api_HostAddress}}/api/map/2
 Accept: application/json
 
 ### GET request test
-GET http://172.20.4.206/api/results/excel/B06-1393-?1
+GET {{QuickTest.Api_HostAddress}}/api/results/excel/B01-4110-14?1
 Accept: application/json
 
 ### GET request test
-GET {{Remote.Api_HostAddress}}/api/quick-test/exists/B01-3277-28
+GET {{Remote.Api_HostAddress}}/api/quick-test/exists/B01-4110-14
 Accept: application/json
 
 ### GET request test
 
 GET {{Remote.Api_HostAddress}}/api/map/2
+Accept: application/json
+
+### Get Available Pads
+GET {{QuickTest.Api_HostAddress}}/api/pads/available/B01-4110-14
 Accept: application/json

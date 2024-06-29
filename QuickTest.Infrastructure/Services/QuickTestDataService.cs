@@ -10,6 +10,7 @@ using QuickTest.Data.AppSettings;
 using QuickTest.Data.Models.Measurements;
 using ErrorOr;
 using MongoDB.Bson;
+using QuickTest.Data.DataTransfer;
 using QuickTest.Data.Models;
 using QuickTest.Data.Models.Wafers.Enums;
 namespace QuickTest.Infrastructure.Services;
@@ -33,6 +34,7 @@ public class QuickTestDataService {
     public QuickTestDataService(ILogger<QuickTestDataService> logger, IMongoClient mongoClient,IOptions<DatabaseSettings> options) {
         this._logger = logger;
         var database = mongoClient.GetDatabase(options.Value.DatabaseName);
+        //var database=mongoClient.GetDatabase("quick_test_db_v2");
         this._qtCollection = database.GetCollection<QuickTestResult>(options.Value.QuickTestCollectionName ??"quick_test");
         this._initMeasureCollection=database.GetCollection<QtMeasurement>(options.Value.InitialMeasurementCollectionName ?? "init_measurements");
         this._finalMeasureCollection=database.GetCollection<QtMeasurement>(options.Value.FinalMeasurementCollectionName ??"final_measurements");
@@ -62,33 +64,94 @@ public class QuickTestDataService {
         }
     }
 
+    public async Task MarkTested(string waferId,bool tested, MeasurementType measurementType) {
+        var filter=Builders<QuickTestResult>.Filter.Eq(e=>e.WaferId,waferId);
+        if (measurementType == MeasurementType.Initial) {
+            var update = Builders<QuickTestResult>.Update
+                .Set(e => e.InitialTested, tested)
+                .Set(e => e.InitialTimeStamp, tested ? DateTime.Now : DateTime.MinValue);
+            this._logger.LogInformation("Updated {Wafer} InitialTested to {Tested}",waferId,tested);
+            await this._qtCollection.UpdateOneAsync(filter,update);
+        } else {
+            var update = Builders<QuickTestResult>.Update
+                .Set(e => e.FinalTested, tested)
+                .Set(e=>e.FinalTimeStamp,tested ? DateTime.Now:DateTime.MinValue);
+            this._logger.LogInformation("Updated {Wafer} FinalTested to {Tested}",waferId,tested);
+            await this._qtCollection.UpdateOneAsync(filter,update);
+        }
+    }
+
     public async Task<ErrorOr<bool>> CreateQuickTest(string waferId,int stationId) {
         if (await this.QtWaferExists(waferId)) {
             return true;
         }
-        var epiDataResult = await this.WaferExists(waferId);
-        if (epiDataResult.IsError) {
-            return epiDataResult.FirstError;
-        }
-        if (epiDataResult.Value) {
-            QuickTestResult qt = new QuickTestResult() { _id = ObjectId.GenerateNewId(), WaferId = waferId };
-            await this._qtCollection.InsertOneAsync(qt);
-            return await this.QtWaferExists(waferId);
-        } else {
-            return false;
-        }
+        QuickTestResult qt = new QuickTestResult() { _id = ObjectId.GenerateNewId(), WaferId = waferId };
+        await this._qtCollection.InsertOneAsync(qt);
+        return await this.QtWaferExists(waferId);
     }
     
-    public async Task<bool> InsertMeasurement(QtMeasurement measurement) {
+    public async Task<bool> InsertMeasurement(MeasurementDto measurement) {
+        QtMeasurement? qtMeasurement;
         if (measurement.MeasurementType == (int)MeasurementType.Initial) {
-            measurement._id = ObjectId.GenerateNewId();
-            await this._initMeasureCollection.InsertOneAsync(measurement);
-            return await this._initMeasureCollection.Find(e=>e._id==measurement._id).AnyAsync();
+            qtMeasurement = await this._initMeasureCollection
+                .Find(e => e.WaferId == measurement.WaferId && e.Current == measurement.Current)
+                .FirstOrDefaultAsync();
         } else {
-            measurement._id = ObjectId.GenerateNewId();
-            await this._finalMeasureCollection.InsertOneAsync(measurement);
-            return await this._initMeasureCollection.Find(e=>e._id==measurement._id).AnyAsync();
+            qtMeasurement = await this._finalMeasureCollection
+                .Find(e => e.WaferId == measurement.WaferId && e.Current == measurement.Current)
+                .FirstOrDefaultAsync();
         }
+        if (qtMeasurement != null) {
+            var pad = PadLocation.List.FirstOrDefault(e => measurement.Pad!.Contains(e));
+            if(pad!=null) {
+                qtMeasurement.Measurements[pad.Value]=new PadMeasurement() {
+                    ActualPad = measurement.Pad!,
+                    Wl = measurement.Wl,
+                    Power = measurement.Power,
+                    Voltage = measurement.Voltage,
+                    Knee = measurement.Knee,
+                    Ir = measurement.Ir
+                };
+                var update=Builders<QtMeasurement>.Update
+                    .Set(e=>e.Measurements,qtMeasurement.Measurements);
+                if (measurement.MeasurementType == (int)MeasurementType.Initial) {
+                    await this._initMeasureCollection.UpdateOneAsync(e=>e._id==qtMeasurement._id,update);
+                    return true;
+                } else {
+                    await this._finalMeasureCollection.UpdateOneAsync(e=>e._id==qtMeasurement._id,update);
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            qtMeasurement=new QtMeasurement() {
+                _id = ObjectId.GenerateNewId(),
+                WaferId = measurement.WaferId!,
+                Current = measurement.Current,
+                Measurements = new Dictionary<string, PadMeasurement>()
+            };
+            var pad = PadLocation.List.FirstOrDefault(e => measurement.Pad!.Contains(e));
+            if(pad!=null) {
+                qtMeasurement.Measurements.Add(pad.Value,new PadMeasurement() {
+                    ActualPad = measurement.Pad!,
+                    Wl = measurement.Wl,
+                    Power = measurement.Power,
+                    Voltage = measurement.Voltage,
+                    Knee = measurement.Knee,
+                    Ir = measurement.Ir
+                });
+            }
+            var update=Builders<QtMeasurement>.Update
+                .Set(e=>e.Measurements,qtMeasurement.Measurements);
+            if (measurement.MeasurementType == (int)MeasurementType.Initial) {
+                await this._initMeasureCollection.UpdateOneAsync(e=>e._id==qtMeasurement._id,update);
+                return true;
+            } else {
+                await this._finalMeasureCollection.UpdateOneAsync(e=>e._id==qtMeasurement._id,update);
+                return true;
+            }
+        }
+        return false;
     }
     
     public Task<bool> QtWaferExists(string waferId) {
@@ -109,7 +172,7 @@ public class QuickTestDataService {
     public async Task<List<List<string>>> GetResults(List<string> waferIds,MeasurementType type) {
         List<List<string>> rows = new List<List<string>>();
         foreach (var waferId in waferIds) {
-            var row=await this.GetResult(waferId,type);
+            var row=await this.GetResultV2(waferId,type);
             rows.Add(row);
         }
         return rows;
@@ -117,8 +180,8 @@ public class QuickTestDataService {
 
     public async Task<List<string>> GetResultAll(string waferId) {
         List<string> row= new List<string>();
-        var initial = await this.GetResult(waferId,MeasurementType.Initial);
-        var final = await this.GetResult(waferId,MeasurementType.Final);
+        var initial = await this.GetResultV2(waferId,MeasurementType.Initial);
+        var final = await this.GetResultV2(waferId,MeasurementType.Final);
         row.AddRange(initial);
         row.AddRange(final);
         return row;
@@ -132,8 +195,8 @@ public class QuickTestDataService {
         }
         return rows;
     }
-    
-    public async Task<List<string>> GetResult(string waferId,MeasurementType type) {
+
+    public async Task<List<string>> GetResultV2(string waferId, MeasurementType type) {
         var qt = await this._qtCollection.Find(e => e.WaferId == waferId)
             .FirstOrDefaultAsync();
         List<string> values = new List<string>();
@@ -150,28 +213,25 @@ public class QuickTestDataService {
             Console.WriteLine($"WaferId {waferId} not found in database. Returning empty.");
             return values;
         }
-        List<QtMeasurement> measurements;
+        //List<QtMeasurement> measurements;
+        Dictionary<string,PadMeasurement> measurements;
         StringBuilder builder = new StringBuilder();
         if (type == MeasurementType.Initial) {
-            measurements=await this._initMeasureCollection.Find(e => e.QuickTestResultId==qt._id && e.Current==20).ToListAsync();
+            measurements=await this._initMeasureCollection
+                .Find(e => e.QuickTestResultId==qt._id && e.Current==20)
+                .Project(e=>e.Measurements)
+                .FirstOrDefaultAsync();
             builder.AppendFormat($"{qt.InitialTimeStamp.ToString(CultureInfo.InvariantCulture)}");
         } else {
-            measurements = await this._finalMeasureCollection.Find(e => e.QuickTestResultId==qt._id).ToListAsync();
+            measurements=await this._finalMeasureCollection
+                .Find(e => e.QuickTestResultId==qt._id && e.Current==20)
+                .Project(e=>e.Measurements)
+                .FirstOrDefaultAsync();
             builder.AppendFormat($"{qt.FinalTimeStamp.ToString(CultureInfo.InvariantCulture)}");
         }
         if (measurements.Any()) {
             values.Add(qt.InitialTimeStamp.ToString(CultureInfo.InvariantCulture));
-            GetPadMeasurement(measurements,PadLocation.PadLocationA.Value,values);
-            GetPadMeasurement(measurements,PadLocation.PadLocationB.Value,values);
-            GetPadMeasurement(measurements,PadLocation.PadLocationC.Value,values);
-            GetPadMeasurement(measurements,PadLocation.PadLocationD.Value,values);
-            GetPadMeasurement(measurements,PadLocation.PadLocationR.Value,values);
-            GetPadMeasurement(measurements,PadLocation.PadLocationT.Value,values);
-            GetPadMeasurement(measurements,PadLocation.PadLocationL.Value,values);
-            GetPadMeasurement(measurements,PadLocation.PadLocationG.Value,values);
-            /*foreach (var pad in PadLocation.List.Select(e => e.Value)) {
-                GetPadMeasurement(measurements, pad, values);
-            }*/
+            GetPadMeasurement(measurements,values);
             return values;
         } else {
             double zero = 0.00;
@@ -185,45 +245,35 @@ public class QuickTestDataService {
             return values;
         }
     }
-
-    private static void GetPadMeasurement(List<QtMeasurement> measurements, string pad, List<string> values) {
-        var padMeasurements = measurements.Where(e => e.Pad != null && e.Pad.Contains(pad)).ToArray();
-        QtMeasurement? measurement=null;
-        if (padMeasurements.Any()) {
-            if(padMeasurements.Count()>1) {
-                measurement=padMeasurements.OrderBy(e => e._id).First();
+    
+    private static void GetPadMeasurement(Dictionary<string,PadMeasurement> measurements, List<string> values) {
+        foreach (var pad in PadLocation.List) {
+            if (measurements.ContainsKey(pad)) {
+                values.AddRange([Math.Round(measurements[pad].Wl, 2).ToString(CultureInfo.InvariantCulture),
+                    Math.Round(measurements[pad].Power, 2).ToString(CultureInfo.InvariantCulture),
+                    Math.Round(measurements[pad].Voltage, 2).ToString(CultureInfo.InvariantCulture),
+                    measurements[pad].Knee.ToString(CultureInfo.InvariantCulture),
+                    measurements[pad].Ir.ToString(CultureInfo.InvariantCulture)]);
             } else {
-                measurement=padMeasurements.First();
+                double zero = 0.00;
+                values.AddRange([zero.ToString(CultureInfo.InvariantCulture),
+                    zero.ToString(CultureInfo.InvariantCulture),
+                    zero.ToString(CultureInfo.InvariantCulture),
+                    zero.ToString(CultureInfo.InvariantCulture),
+                    zero.ToString(CultureInfo.InvariantCulture)]);
             }
-        } else {
-            measurement = null;
-        }
-        if (measurement != null) {
-            values.AddRange([Math.Round(measurement.Wl, 2).ToString(CultureInfo.InvariantCulture),
-                Math.Round(measurement.Power, 2).ToString(CultureInfo.InvariantCulture),
-                Math.Round(measurement.Voltage, 2).ToString(CultureInfo.InvariantCulture),
-                measurement.Knee.ToString(CultureInfo.InvariantCulture),
-                measurement.Ir.ToString(CultureInfo.InvariantCulture)]);
-        } else {
-            double zero = 0.00;
-            values.AddRange([zero.ToString(CultureInfo.InvariantCulture),
-                zero.ToString(CultureInfo.InvariantCulture),
-                zero.ToString(CultureInfo.InvariantCulture),
-                zero.ToString(CultureInfo.InvariantCulture),
-                zero.ToString(CultureInfo.InvariantCulture)]);
         }
     }
     
     public async Task<List<string>> GetAvailableBurnInPads(string waferId) {
-        var pads= await  this._initMeasureCollection
-            .Find(e => e.WaferId == waferId && e.Current == 20 && !string.IsNullOrEmpty(e.Pad))
-            .Project(e => e.Pad!)
-            .ToListAsync();
-        return pads ?? Enumerable.Empty<string>().ToList();
+        var measurements = await this._initMeasureCollection.Find(e => e.WaferId == waferId && e.Current == 20)
+            .Project(e => e.Measurements)
+            .FirstOrDefaultAsync();
+        return measurements.Keys.ToList() ?? [];
     }
 
     public async Task<List<string>> GetQuickTestList(DateTime start) {
-        var waferList=await this._qtCollection.Find(e=>e.InitialTimeStamp>start).Project(e=>e.WaferId).ToListAsync();
-        return waferList ?? Enumerable.Empty<string>().ToList();
+        var waferList=await this._qtCollection.Find(e=>e.InitialTimeStamp>start).Project(e=>e.WaferId!).ToListAsync();
+        return waferList ?? [];
     }
 }

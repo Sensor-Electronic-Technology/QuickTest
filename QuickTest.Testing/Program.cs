@@ -27,7 +27,17 @@ await CreateWaferMaps();*/
 //await GetWaferPadsTest();
 //await GetNewMap();
 
-await CloneDatabase();
+//await CloneDatabase();
+
+/*await CreateWaferPadsV2();
+await CreateFourInchWaferPadsV2();
+await CreateWaferMaps();*/
+
+/*async Task GetAvailablePads() {
+    var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
+    var database = mongoClient.GetDatabase("quick_test_db_v2");
+    var collection = database.GetCollection<QtMeasurement>("");
+}*/
 
 
 async Task CloneDatabase(){
@@ -621,4 +631,529 @@ async Task CreateWaferPads() {
 
 
     Console.WriteLine("Hello, World!");
+}
+
+async Task CreateFourInchWaferPadsV2() {
+    /*HttpClient client = new HttpClient();
+    client.BaseAddress = new Uri("http://172.20.4.206/");*/
+    WaferDataService waferDataService = new WaferDataService(new MongoClient("mongodb://172.20.3.41:27017"));
+    List<(PadLocation, WaferArea, int, int, int, int)> _coord = 
+    [
+        (PadLocation.PadLocationL, WaferArea.Edge, 1, 121, 369, 7),
+        (PadLocation.PadLocationL, WaferArea.Edge, 2, 136, 368, 7),
+        (PadLocation.PadLocationL, WaferArea.Edge, 3, 153, 370, 6),
+        (PadLocation.PadLocationL, WaferArea.Edge, 4, 122, 433, 5),
+        (PadLocation.PadLocationL, WaferArea.Edge, 5, 136, 433, 5),
+        (PadLocation.PadLocationL, WaferArea.Edge, 6, 152, 433, 5),
+
+        (PadLocation.PadLocationL, WaferArea.Middle, 1, 242, 372, 6),
+        (PadLocation.PadLocationL, WaferArea.Middle, 2, 259, 372, 6),
+        (PadLocation.PadLocationL, WaferArea.Middle, 3, 273, 373, 6),
+        (PadLocation.PadLocationL, WaferArea.Middle, 4, 243, 437, 6),
+        (PadLocation.PadLocationL, WaferArea.Middle, 5, 257, 436, 6),
+        (PadLocation.PadLocationL, WaferArea.Middle, 6, 274, 437, 6),
+
+        (PadLocation.PadLocationG, WaferArea.Edge, 1, 399, 708, 6),
+        (PadLocation.PadLocationG, WaferArea.Edge, 2, 399, 724, 6),
+        (PadLocation.PadLocationG, WaferArea.Edge, 3, 398, 740, 6),
+        (PadLocation.PadLocationG, WaferArea.Edge, 4, 467, 709, 7),
+        (PadLocation.PadLocationG, WaferArea.Edge, 5, 465, 722, 5),
+        (PadLocation.PadLocationG, WaferArea.Edge, 6, 465, 738, 5),
+
+        (PadLocation.PadLocationG, WaferArea.Middle, 1, 401, 581, 5),
+        (PadLocation.PadLocationG, WaferArea.Middle, 2, 400, 596, 7),
+        (PadLocation.PadLocationG, WaferArea.Middle, 3, 400, 612, 7),
+        (PadLocation.PadLocationG, WaferArea.Middle, 4, 469, 580, 7),
+        (PadLocation.PadLocationG, WaferArea.Middle, 5, 469, 595, 6),
+        (PadLocation.PadLocationG, WaferArea.Middle, 6, 470, 612, 7),
+
+        (PadLocation.PadLocationR, WaferArea.Middle, 1, 583, 385, 6),
+        (PadLocation.PadLocationR, WaferArea.Middle, 2, 600, 385, 7),
+        (PadLocation.PadLocationR, WaferArea.Middle, 3, 616, 385, 6),
+        (PadLocation.PadLocationR, WaferArea.Middle, 4, 584, 444, 7),
+        (PadLocation.PadLocationR, WaferArea.Middle, 5, 601, 446, 6),
+        (PadLocation.PadLocationR, WaferArea.Middle, 6, 617, 445, 6),
+
+        (PadLocation.PadLocationR, WaferArea.Edge, 1, 700, 383, 5),
+        (PadLocation.PadLocationR, WaferArea.Edge, 2, 717, 383, 6),
+        (PadLocation.PadLocationR, WaferArea.Edge, 3, 732, 383, 6),
+        (PadLocation.PadLocationR, WaferArea.Edge, 4, 704, 444, 7),
+        (PadLocation.PadLocationR, WaferArea.Edge, 5, 719, 445, 5),
+        (PadLocation.PadLocationR, WaferArea.Edge, 6, 734, 444, 6),
+
+        (PadLocation.PadLocationT, WaferArea.Edge, 1, 397, 135, 7),
+        (PadLocation.PadLocationT, WaferArea.Edge, 2, 396, 121, 6),
+        (PadLocation.PadLocationT, WaferArea.Edge, 3, 397, 105, 6),
+        (PadLocation.PadLocationT, WaferArea.Edge, 4, 462, 136, 6),
+        (PadLocation.PadLocationT, WaferArea.Edge, 5, 461, 122, 6),
+        (PadLocation.PadLocationT, WaferArea.Edge, 6, 462, 106, 6),
+
+        (PadLocation.PadLocationT, WaferArea.Middle, 1, 397, 262, 6),
+        (PadLocation.PadLocationT, WaferArea.Middle, 2, 396, 246, 6),
+        (PadLocation.PadLocationT, WaferArea.Middle, 3, 397, 231, 6),
+        (PadLocation.PadLocationT, WaferArea.Middle, 4, 461, 263, 4),
+        (PadLocation.PadLocationT, WaferArea.Middle, 5, 462, 248, 6),
+        (PadLocation.PadLocationT, WaferArea.Middle, 6, 463, 232, 6),
+
+        (PadLocation.PadLocationA, WaferArea.Center, 0, 398, 376, 6),
+        (PadLocation.PadLocationB, WaferArea.Center, 0, 398, 439, 7),
+        (PadLocation.PadLocationC, WaferArea.Center, 0, 463, 440, 7),
+        (PadLocation.PadLocationD, WaferArea.Center, 0, 462, 375, 7),
+    ];
+    
+    foreach(var pad in _coord) {
+        CreateWaferPadRequest request = new CreateWaferPadRequest() {
+            PadLocation = pad.Item1,
+            WaferArea = pad.Item2,
+            PadNumber = pad.Item3,
+            PadMapDefinition = new PadMapDefinition() {
+                X = pad.Item4,
+                Y = pad.Item5,
+                Radius = pad.Item6
+            },
+            WaferSize = WaferSize.FourInch
+        };
+        WaferPad wpad = new WaferPad();
+        wpad.PadLocation = request.PadLocation;
+        wpad.PadNumber = request.PadNumber;
+        wpad.SvgObject = request.PadMapDefinition;
+        wpad.WaferArea = request.WaferArea;
+        wpad.WaferSize = request.WaferSize;
+        if (request.WaferArea.Value == WaferArea.Center) {
+            wpad.Identifier = $"{request.PadLocation.Value}";
+        } else {
+            wpad.Identifier = $"{request.PadLocation.Value}{request.PadNumber}-{request.WaferArea.Value}";
+        }
+        var result=await waferDataService.CreateWaferPad(wpad);
+        Console.WriteLine("Created Wafer Pad: {0}", wpad.Identifier);
+        /*HttpResponseMessage response = await client.PostAsJsonAsync("api/pads/create/{waferPad}", request);
+        Console.WriteLine(response.ToString());*/
+    }
+}
+
+async Task CreateWaferPadsV2() { 
+    /*HttpClient client = new HttpClient();
+    client.BaseAddress = new Uri("http://172.20.4.206");*/
+    WaferDataService waferDataService = new WaferDataService(new MongoClient("mongodb://172.20.3.41:27017"));
+    List<CreateWaferPadRequest> centerPads = new List<CreateWaferPadRequest>() {
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationA,
+            PadNumber = 0,
+            PadMapDefinition = new PadMapDefinition() {
+                X=368,
+                Y=365,
+                Radius=11,
+            },
+            WaferArea = WaferArea.Center,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationB,
+            PadNumber = 0,
+            PadMapDefinition = new PadMapDefinition() {
+                X=368,
+                Y=441,
+                Radius=11,
+            },
+            WaferArea = WaferArea.Center,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationC,
+            PadNumber = 0,
+            PadMapDefinition = new PadMapDefinition() {
+                X=445,
+                Y=442,
+                Radius=11,
+            },
+            WaferArea = WaferArea.Center,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationD,
+            PadNumber = 0,
+            PadMapDefinition = new PadMapDefinition() {
+                X=445,
+                Y=366,
+                Radius=11,
+            },
+            WaferArea = WaferArea.Center,
+            WaferSize = WaferSize.TwoInch
+        },
+    };
+
+    List<CreateWaferPadRequest> leftPads = new List<CreateWaferPadRequest>() {
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationL,
+            PadNumber = 1,
+            PadMapDefinition = new PadMapDefinition() {
+                X=143,
+                Y=365,
+                Radius=7,
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationL,
+            PadNumber = 2,
+            PadMapDefinition = new PadMapDefinition() {
+                X=160,
+                Y=365,
+                Radius=7,
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationL,
+            PadNumber = 3,
+            PadMapDefinition = new PadMapDefinition() {
+                X=178,
+                Y=365,
+                Radius=7,
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationL,
+            PadNumber = 4,
+            PadMapDefinition = new PadMapDefinition() {
+                X=141,
+                Y=441,
+                Radius=7,
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationL,
+            PadNumber = 5,
+            PadMapDefinition = new PadMapDefinition() {
+                X=160,
+                Y=442,
+                Radius=7,
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationL,
+            PadNumber = 6,
+            PadMapDefinition = new PadMapDefinition() {
+                X=179,
+                Y=442,
+                Radius=7,
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+    };
+    
+    List<CreateWaferPadRequest> rightPads = new List<CreateWaferPadRequest>() {
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationR,
+            PadNumber = 1,
+            PadMapDefinition = new PadMapDefinition() {
+                X=632,
+                Y=373,
+                Radius=8,
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationR,
+            PadNumber = 2,
+            PadMapDefinition = new PadMapDefinition() {
+                X=651,
+                Y=373,
+                Radius=8,
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationR,
+            PadNumber = 3,
+            PadMapDefinition = new PadMapDefinition() {
+                X=669,
+                Y=373,
+                Radius=8,
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationR,
+            PadNumber = 4,
+            PadMapDefinition = new PadMapDefinition() {
+                X=634,
+                Y=445,
+                Radius=8,
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationR,
+            PadNumber = 5,
+            PadMapDefinition = new PadMapDefinition() {
+                X=653,
+                Y=445,
+                Radius=8,
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationR,
+            PadNumber = 6,
+            PadMapDefinition = new PadMapDefinition() {
+                X=672,
+                Y=445,
+                Radius=8,
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+    };
+    
+    List<CreateWaferPadRequest> bottomPads = new List<CreateWaferPadRequest>() {
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationG,
+            PadNumber = 1,
+            PadMapDefinition = new PadMapDefinition() {
+                X=364,
+                Y=649,
+                Radius=8
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationG,
+            PadNumber = 2,
+            PadMapDefinition = new PadMapDefinition() {
+                X=364,
+                Y=668,
+                Radius=8
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationG,
+            PadNumber = 3,
+            PadMapDefinition = new PadMapDefinition() {
+                X=364,
+                Y=687,
+                Radius=8
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationG,
+            PadNumber = 4,
+            PadMapDefinition = new PadMapDefinition() {
+                X=443,
+                Y=652,
+                Radius=8
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationG,
+            PadNumber = 5,
+            PadMapDefinition = new PadMapDefinition() {
+                X=443,
+                Y=670,
+                Radius=8
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationG,
+            PadNumber = 6,
+            PadMapDefinition = new PadMapDefinition() {
+                X=442,
+                Y=688,
+                Radius=7
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+    };
+    
+    List<CreateWaferPadRequest> topPads = new List<CreateWaferPadRequest>() {
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationT,
+            PadNumber = 1,
+            PadMapDefinition = new PadMapDefinition() {
+                X=365,
+                Y=164,
+                Radius=8
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationT,
+            PadNumber = 2,
+            PadMapDefinition = new PadMapDefinition() {
+                X=365,
+                Y=146,
+                Radius=8
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationT,
+            PadNumber = 3,
+            PadMapDefinition = new PadMapDefinition() {
+                X=365,
+                Y=127,
+                Radius=8
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationT,
+            PadNumber = 4,
+            PadMapDefinition = new PadMapDefinition() {
+                X=445,
+                Y=163,
+                Radius=8
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationT,
+            PadNumber = 5,
+            PadMapDefinition = new PadMapDefinition() {
+                X=445,
+                Y=144,
+                Radius=8
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+        new CreateWaferPadRequest() {
+            PadLocation = PadLocation.PadLocationT,
+            PadNumber = 6,
+            PadMapDefinition = new PadMapDefinition() {
+                X=445,
+                Y=126,
+                Radius=8
+            },
+            WaferArea = WaferArea.Edge,
+            WaferSize = WaferSize.TwoInch
+        },
+    };
+    
+    Console.WriteLine("Press any key to create a wafer pad...");
+    Console.ReadKey();
+    foreach (var pad in centerPads) {
+        WaferPad wpad = new WaferPad();
+        wpad.PadLocation = pad.PadLocation;
+        wpad.PadNumber = pad.PadNumber;
+        wpad.SvgObject = pad.PadMapDefinition;
+        wpad.WaferArea = pad.WaferArea;
+        wpad.WaferSize = pad.WaferSize;
+        if (pad.WaferArea.Value == WaferArea.Center) {
+            wpad.Identifier = $"{pad.PadLocation.Value}";
+        } else {
+            wpad.Identifier = $"{pad.PadLocation.Value}{pad.PadNumber}-{pad.WaferArea.Value}";
+        }
+
+        var result=await waferDataService.CreateWaferPad(wpad);
+        Console.WriteLine("Created Wafer Pad: " + wpad.Identifier);
+        /*
+        HttpResponseMessage response = await client.PostAsJsonAsync("api/pads/create/{waferPad}", pad);
+        Console.WriteLine(response.ToString());*/
+    }
+
+    foreach (var pad in rightPads) {
+        WaferPad wpad = new WaferPad();
+        wpad.PadLocation = pad.PadLocation;
+        wpad.PadNumber = pad.PadNumber;
+        wpad.SvgObject = pad.PadMapDefinition;
+        wpad.WaferArea = pad.WaferArea;
+        wpad.WaferSize = pad.WaferSize;
+        if (pad.WaferArea.Value == WaferArea.Center) {
+            wpad.Identifier = $"{pad.PadLocation.Value}";
+        } else {
+            wpad.Identifier = $"{pad.PadLocation.Value}{pad.PadNumber}-{pad.WaferArea.Value}";
+        }
+
+        var result=await waferDataService.CreateWaferPad(wpad);
+        Console.WriteLine("Created Wafer Pad: " + wpad.Identifier);
+        /*HttpResponseMessage response = await client.PostAsJsonAsync("api/pads/create/{waferPad}", pad);
+        Console.WriteLine(response.ToString());*/
+    }
+    
+    foreach (var pad in bottomPads) {
+        WaferPad wpad = new WaferPad();
+        wpad.PadLocation = pad.PadLocation;
+        wpad.PadNumber = pad.PadNumber;
+        wpad.SvgObject = pad.PadMapDefinition;
+        wpad.WaferArea = pad.WaferArea;
+        wpad.WaferSize = pad.WaferSize;
+        if (pad.WaferArea.Value == WaferArea.Center) {
+            wpad.Identifier = $"{pad.PadLocation.Value}";
+        } else {
+            wpad.Identifier = $"{pad.PadLocation.Value}{pad.PadNumber}-{pad.WaferArea.Value}";
+        }
+
+        var result=await waferDataService.CreateWaferPad(wpad);
+        Console.WriteLine("Created Wafer Pad: " + wpad.Identifier);
+        /*HttpResponseMessage response = await client.PostAsJsonAsync("api/pads/create/{waferPad}", pad);
+        Console.WriteLine(response.ToString());*/
+    }
+    
+    foreach (var pad in topPads) {
+        WaferPad wpad = new WaferPad();
+        wpad.PadLocation = pad.PadLocation;
+        wpad.PadNumber = pad.PadNumber;
+        wpad.SvgObject = pad.PadMapDefinition;
+        wpad.WaferArea = pad.WaferArea;
+        wpad.WaferSize = pad.WaferSize;
+        if (pad.WaferArea.Value == WaferArea.Center) {
+            wpad.Identifier = $"{pad.PadLocation.Value}";
+        } else {
+            wpad.Identifier = $"{pad.PadLocation.Value}{pad.PadNumber}-{pad.WaferArea.Value}";
+        }
+
+        var result=await waferDataService.CreateWaferPad(wpad);
+        Console.WriteLine("Created Wafer Pad: " + wpad.Identifier);
+        /*HttpResponseMessage response = await client.PostAsJsonAsync("api/pads/create/{waferPad}", pad);
+        
+        Console.WriteLine(response.ToString());*/
+    }
+    
+    foreach (var pad in leftPads) {
+        WaferPad wpad = new WaferPad();
+        wpad.PadLocation = pad.PadLocation;
+        wpad.PadNumber = pad.PadNumber;
+        wpad.SvgObject = pad.PadMapDefinition;
+        wpad.WaferArea = pad.WaferArea;
+        wpad.WaferSize = pad.WaferSize;
+        if (pad.WaferArea.Value == WaferArea.Center) {
+            wpad.Identifier = $"{pad.PadLocation.Value}";
+        } else {
+            wpad.Identifier = $"{pad.PadLocation.Value}{pad.PadNumber}-{pad.WaferArea.Value}";
+        }
+
+        var result=await waferDataService.CreateWaferPad(wpad);
+        Console.WriteLine("Created Wafer Pad: " + wpad.Identifier);
+        /*HttpResponseMessage response = await client.PostAsJsonAsync("api/pads/create/{waferPad}", pad);
+        Console.WriteLine(response.ToString());*/
+    }
 }

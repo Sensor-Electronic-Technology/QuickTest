@@ -1,4 +1,4 @@
-﻿namespace QuickTest.Data.Contracts.Responses.Push;
+﻿namespace QuickTest.Data.Contracts.Responses.Put;
 
 public class InsertMeasurementResponse {
     public bool Success { get; set; }

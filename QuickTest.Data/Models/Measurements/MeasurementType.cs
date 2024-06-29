@@ -9,8 +9,8 @@ public enum MeasurementType:int {
 }
 
 
-public class MeasurementTypeSmart : SmartEnum<MeasurementTypeSmart, int> {
+/*public class MeasurementTypeSmart : SmartEnum<MeasurementTypeSmart, int> {
     public static MeasurementTypeSmart Initial  = new MeasurementTypeSmart(nameof(Initial), 0);
-    public static MeasurementTypeSmart Final  = new MeasurementTypeSmart(nameof(Final), 0);
+    public static MeasurementTypeSmart Final  = new MeasurementTypeSmart(nameof(Final), 1);
     public MeasurementTypeSmart(String name, int value) : base(name, value) { }
-}
+}*/

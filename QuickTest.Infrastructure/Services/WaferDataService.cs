@@ -1,14 +1,10 @@
-﻿using Amazon.Runtime.Internal.Util;
-using EpiData.Data.Models.Epi.Enums;
+﻿using EpiData.Data.Models.Epi.Enums;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using ErrorOr;
 using MongoDB.Bson;
 using QuickTest.Data.DataTransfer;
-using QuickTest.Data.Models.Measurements;
 using QuickTest.Data.Models.Wafers;
-using QuickTest.Data.Models.Wafers.Enums;
-using ILogger = Amazon.Runtime.Internal.Util.ILogger;
 
 namespace QuickTest.Infrastructure.Services;
 
@@ -20,14 +16,15 @@ public class WaferDataService {
 
     public WaferDataService(ILogger<WaferDataService> logger, IMongoClient mongoClient) {
         this._logger = logger;
-        var database = mongoClient.GetDatabase("quick_test_db");
+        //var database = mongoClient.GetDatabase("quick_test_db");
+        var database=mongoClient.GetDatabase("quick_test_db_v2");
         this._waferPadCollection = database.GetCollection<WaferPad>("wafer_pads");
         this._waferMapCollection = database.GetCollection<WaferMap>("wafer_maps");
         this._labviewWaferMapCollection = database.GetCollection<LvWaferMap>("lv_wafer_maps");
     }
 
     public WaferDataService(IMongoClient mongoClient) {
-        var database = mongoClient.GetDatabase("quick_test_db");
+        var database = mongoClient.GetDatabase("quick_test_db_v2");
         this._waferPadCollection = database.GetCollection<WaferPad>("wafer_pads");
         this._waferMapCollection = database.GetCollection<WaferMap>("wafer_maps");
         this._labviewWaferMapCollection = database.GetCollection<LvWaferMap>("lv_wafer_maps");
