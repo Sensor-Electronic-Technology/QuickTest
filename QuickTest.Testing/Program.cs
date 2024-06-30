@@ -29,9 +29,9 @@ await CreateWaferMaps();*/
 
 //await CloneDatabase();
 
-/*await CreateWaferPadsV2();
+await CreateWaferPadsV2();
 await CreateFourInchWaferPadsV2();
-await CreateWaferMaps();*/
+await CreateWaferMaps();
 
 /*async Task GetAvailablePads() {
     var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");

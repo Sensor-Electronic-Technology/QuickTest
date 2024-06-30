@@ -34,7 +34,7 @@ var waferList=await service.GetWaferList();*/
 //await TestQtV2();
 //await GetInitialResults();
 
-//await Migrate();
+await Migrate();
 //await CreateHelperCollections();
 
 //await TestGetWaferPads();
@@ -57,9 +57,7 @@ var waferList=await service.GetWaferList();*/
 async Task Migrate() {
     var context = new EpiContext();
     var clientWork=new MongoClient("mongodb://172.20.3.41:27017");
-    //var clientPi=new MongoClient("mongodb://192.168.68.112:27017");
-    var databaseWork=clientWork.GetDatabase("quick_test_db_v2");
-    //var databasePi=clientPi.GetDatabase("quick_test_db");
+    var databaseWork=clientWork.GetDatabase("quick_test_db");
     var qtCollectionWork=databaseWork.GetCollection<QuickTestResult>("quick_test");
     var initMeasureCollection=databaseWork.GetCollection<QtMeasurement>("init_measurements");
     var finalMeasureCollection=databaseWork.GetCollection<QtMeasurement>("final_measurements");
@@ -68,9 +66,9 @@ async Task Migrate() {
     await qtCollectionWork.Indexes.CreateOneAsync(new CreateIndexModel<QuickTestResult>(Builders<QuickTestResult>.IndexKeys.Ascending(e => e.WaferId)));
     
     Console.WriteLine("Starting Migration...");
-    var start=new DateTime(2024,1,1);
-    var wafers=await context.EpiDataInitials.Where(e=>e.DateTime>=start).Select(e=>e.WaferId)
-        .Distinct().ToListAsync();
+    var wafers=await context.EpiDataInitials.Select(e=>e.WaferId)
+        .Distinct()
+        .ToListAsync();
     Console.WriteLine($"Wafer Count:{wafers.Count()}");
     int saveCounter=0;
     int count = 0;
@@ -111,7 +109,7 @@ async Task Migrate() {
         saveCounter++;
         count++;
         Console.WriteLine($"Created QuickTestResult for wafer: {wafer} Count:{count}");
-        if(saveCounter>=2) {
+        if(saveCounter>=100) {
             Console.WriteLine("Saving 100 records...");
             await qtCollectionWork.InsertManyAsync(results);
             if(initMeasureResults.Any()) {
@@ -148,7 +146,7 @@ async Task Migrate() {
 
 async Task CreateHelperCollections() {
     var client=new MongoClient("mongodb://172.20.3.41:27017");
-    var database=client.GetDatabase("quick_test_db_v2");
+    var database=client.GetDatabase("quick_test_db");
     var currentCollection = database.GetCollection<MeasurementCurrent>("measure_current");
     await currentCollection.Indexes.CreateOneAsync(new CreateIndexModel<MeasurementCurrent>(Builders<MeasurementCurrent>.IndexKeys.Ascending(e => e.Name)));
     var stationCollection = database.GetCollection<ProbeStation>("probe_stations");

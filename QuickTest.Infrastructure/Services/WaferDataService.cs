@@ -16,15 +16,15 @@ public class WaferDataService {
 
     public WaferDataService(ILogger<WaferDataService> logger, IMongoClient mongoClient) {
         this._logger = logger;
-        //var database = mongoClient.GetDatabase("quick_test_db");
-        var database=mongoClient.GetDatabase("quick_test_db_v2");
+        var database = mongoClient.GetDatabase("quick_test_db");
+        //var database=mongoClient.GetDatabase("quick_test_db_v2");
         this._waferPadCollection = database.GetCollection<WaferPad>("wafer_pads");
         this._waferMapCollection = database.GetCollection<WaferMap>("wafer_maps");
         this._labviewWaferMapCollection = database.GetCollection<LvWaferMap>("lv_wafer_maps");
     }
 
     public WaferDataService(IMongoClient mongoClient) {
-        var database = mongoClient.GetDatabase("quick_test_db_v2");
+        var database = mongoClient.GetDatabase("quick_test_db");
         this._waferPadCollection = database.GetCollection<WaferPad>("wafer_pads");
         this._waferMapCollection = database.GetCollection<WaferMap>("wafer_maps");
         this._labviewWaferMapCollection = database.GetCollection<LvWaferMap>("lv_wafer_maps");
