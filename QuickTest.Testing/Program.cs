@@ -29,9 +29,9 @@ await CreateWaferMaps();*/
 
 //await CloneDatabase();
 
-await CreateWaferPadsV2();
+/*await CreateWaferPadsV2();
 await CreateFourInchWaferPadsV2();
-await CreateWaferMaps();
+await CreateWaferMaps();*/
 
 /*async Task GetAvailablePads() {
     var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
@@ -39,6 +39,25 @@ await CreateWaferMaps();
     var collection = database.GetCollection<QtMeasurement>("");
 }*/
 
+await UpdateQuickTestWaferSize();
+
+async Task UpdateQuickTestWaferSize() {
+    var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
+    var database = mongoClient.GetDatabase("quick_test_db");
+    var qtCollection = database.GetCollection<QuickTestResult>("quick_test");
+    var update=Builders<QuickTestResult>.Update.Set(e=>e.WaferSize,2);
+    await qtCollection.UpdateManyAsync(e=>true,update);
+    Console.WriteLine("Check Database");
+}
+
+async Task UpdateMeasurementWaferSize() {
+    var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
+    var database = mongoClient.GetDatabase("quick_test_db");
+    var qtCollection = database.GetCollection<QuickTestResult>("quick_test");
+    var update=Builders<QuickTestResult>.Update.Set(e=>e.WaferSize,2);
+    await qtCollection.UpdateManyAsync(e=>true,update);
+    Console.WriteLine("Check Database");
+}
 
 async Task CloneDatabase(){
     var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");

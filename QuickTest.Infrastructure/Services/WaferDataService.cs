@@ -38,9 +38,10 @@ public class WaferDataService {
         return this._waferMapCollection.InsertOneAsync(map);
     }
 
-    public async Task<IEnumerable<WaferPad>> GetWaferPads(List<string> pads) {
-        var p = await this._waferPadCollection.Find(e => pads.Contains(e.Identifier!)).ToListAsync();
-        return p ?? Enumerable.Empty<WaferPad>().ToList();
+    public async Task<IEnumerable<WaferPad>> GetWaferPads(List<string> pads,int waferSize) {
+        var p = await this._waferPadCollection.Find(e => pads.Contains(e.Identifier!) && e.WaferSize!.Value==waferSize)
+            .ToListAsync();
+        return p ?? [];
     }
 
     /*public Task<List<WaferPad>?> GetAvailableBurnInPads(WaferSize waferSize) {

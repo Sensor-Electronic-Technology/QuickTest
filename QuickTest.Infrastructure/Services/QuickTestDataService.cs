@@ -172,7 +172,7 @@ public class QuickTestDataService {
     public async Task<List<List<string>>> GetResults(List<string> waferIds,MeasurementType type) {
         List<List<string>> rows = new List<List<string>>();
         foreach (var waferId in waferIds) {
-            var row=await this.GetResultV2(waferId,type);
+            var row=await this.GetResult(waferId,type);
             rows.Add(row);
         }
         return rows;
@@ -180,8 +180,8 @@ public class QuickTestDataService {
 
     public async Task<List<string>> GetResultAll(string waferId) {
         List<string> row= new List<string>();
-        var initial = await this.GetResultV2(waferId,MeasurementType.Initial);
-        var final = await this.GetResultV2(waferId,MeasurementType.Final);
+        var initial = await this.GetResult(waferId,MeasurementType.Initial);
+        var final = await this.GetResult(waferId,MeasurementType.Final);
         row.AddRange(initial);
         row.AddRange(final);
         return row;
@@ -196,7 +196,7 @@ public class QuickTestDataService {
         return rows;
     }
 
-    public async Task<List<string>> GetResultV2(string waferId, MeasurementType type) {
+    public async Task<List<string>> GetResult(string waferId, MeasurementType type) {
         var qt = await this._qtCollection.Find(e => e.WaferId == waferId)
             .FirstOrDefaultAsync();
         List<string> values = new List<string>();
@@ -265,11 +265,15 @@ public class QuickTestDataService {
         }
     }
     
-    public async Task<List<string>> GetAvailableBurnInPads(string waferId) {
+    public async Task<(List<string> testedPads,int waferSize)> GetAvailableBurnInPads(string waferId) {
+        var waferSize=await this._qtCollection.Find(e=>e.WaferId==waferId)
+            .Project(e=>e.WaferSize)
+            .FirstOrDefaultAsync();
+        waferSize=waferSize==0 ? 2 : waferSize;
         var measurements = await this._initMeasureCollection.Find(e => e.WaferId == waferId && e.Current == 20)
             .Project(e => e.Measurements)
             .FirstOrDefaultAsync();
-        return measurements.Keys.ToList() ?? [];
+        return (measurements.Values.Select(e=>e.ActualPad).ToList() ?? [],waferSize);
     }
 
     public async Task<List<string>> GetQuickTestList(DateTime start) {

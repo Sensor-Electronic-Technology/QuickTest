@@ -25,9 +25,9 @@ public class GetAvailableBurnInPadsEndpoint:Endpoint<GetAvailableBurnInPadsReque
         if (string.IsNullOrEmpty(req.WaferId)) {
             ThrowError("WaferId cannot be null or empty");
         }
-        var testedPads = await this._qtDataService.GetAvailableBurnInPads(req.WaferId);
-        if (testedPads.Any()) {
-            var pads = await this._waferDataService.GetWaferPads(testedPads);
+        var result = await this._qtDataService.GetAvailableBurnInPads(req.WaferId);
+        if (result.testedPads.Any()) {
+            var pads = await this._waferDataService.GetWaferPads(result.testedPads,result.waferSize);
                 var results = pads.Select(e => new Pad() {
                     Identifier = e.Identifier, X = e.SvgObject!.X, Y = e.SvgObject!.Y, Radius = e.SvgObject!.Radius
                 }).ToList();

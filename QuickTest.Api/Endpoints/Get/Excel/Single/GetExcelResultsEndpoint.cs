@@ -24,7 +24,7 @@ public class GetExcelResultsEndpoint:Endpoint<GetResultRequest,GetResultExcelRes
         if (string.IsNullOrEmpty(request.WaferId)) {
             ThrowError("WaferId cannot be null or empty");
         }
-        var rows = await this._qtDataService.GetResultV2(request.WaferId,(MeasurementType)request.MeasurementType);
+        var rows = await this._qtDataService.GetResult(request.WaferId,(MeasurementType)request.MeasurementType);
         await SendAsync(new GetResultExcelResponse() { Row = rows }, cancellation: cancellationToken);
     }
 }

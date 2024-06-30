@@ -47,7 +47,7 @@ GET {{Remote.Api_HostAddress}}/api/map/2
 Accept: application/json
 
 ### Get Available Pads
-GET {{Remote.Api_HostAddress}}/api/pads/available/B01-4110-14
+GET {{QuickTest.Api_HostAddress}}/api/pads/available/B06-1298-09
 Accept: application/json
 
 ### Get Wafer List
