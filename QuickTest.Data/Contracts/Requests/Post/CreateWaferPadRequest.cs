@@ -22,3 +22,12 @@ public class CreateWaferPadRequest {
         this.PadNumber = padNumber;
     }
 }
+
+public class CreateLvWaferPadRequest {
+    public required int WaferSize { get; set; }
+    public required string WaferArea { get; set; }
+    public double X { get; set; }
+    public double Y { get; set; }
+    public double Radius { get; set; }
+
+}

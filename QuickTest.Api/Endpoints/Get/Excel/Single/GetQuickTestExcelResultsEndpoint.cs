@@ -7,10 +7,10 @@ using QuickTest.Infrastructure.Services;
 
 namespace QuickTest.Api.Endpoints.Get.Excel.Single;
 
-public class GetQuickTestExcelResultsPath:Endpoint<GetResultRequest,GetResultExcelResponse> {
+public class GetQuickTestExcelResultsEndpoint:Endpoint<GetResultRequest,GetResultExcelResponse> {
     private readonly QuickTestDataService _qtDataService;
     
-    public GetQuickTestExcelResultsPath(QuickTestDataService qtDataService) {
+    public GetQuickTestExcelResultsEndpoint(QuickTestDataService qtDataService) {
 
         this._qtDataService = qtDataService;
     }

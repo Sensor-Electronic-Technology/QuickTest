@@ -39,18 +39,59 @@ await CreateWaferMaps();*/
     var collection = database.GetCollection<QtMeasurement>("");
 }*/
 
-await UpdateQuickTestWaferSize();
+//await UpdateQuickTestWaferSize();
 
-async Task UpdateQuickTestWaferSize() {
+await CreateLvWaferMap();
+
+async Task CreateLvWaferMap() {
     var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
     var database = mongoClient.GetDatabase("quick_test_db");
-    var qtCollection = database.GetCollection<QuickTestResult>("quick_test");
-    var update=Builders<QuickTestResult>.Update.Set(e=>e.WaferSize,2);
-    await qtCollection.UpdateManyAsync(e=>true,update);
-    Console.WriteLine("Check Database");
+    var collection = database.GetCollection<LvWaferMap>("lv_maps");
+    List<(string id, double x, double y, int rad)> lv_pads = [
+        ("G6-E", 442.647491, 669.927185, 8),
+        ("G5-E", 442.647491, 669.927185, 8),
+        ("G4-E", 364.693481, 668.509521, 8),
+        ("G3-E", 364.693481, 668.509521, 8),
+        ("G2-E", 364.693481, 668.509521, 8),
+        ("G1-E", 363.111084, 648.938660, 8),
+        ("T6-E", 447.394623, 126.337158, 8),
+        ("T5-E", 445.812256, 162.731796, 8),
+        ("T4-E", 445.812256, 162.731796, 8),
+        ("T3-E", 364.858215, 128.337158, 8),
+        ("T2-E", 364.275848, 145.160919, 8),
+        ("T1-E", 364.693481, 164.731796, 8),
+        ("R3-E", 668.674316, 374.187714, 9),
+        ("R2-E", 651.103394, 374.187714, 8),
+        ("R1-E", 630.950134, 372.605347, 9),
+        ("R6-E", 671.674316, 444.812256, 8),
+        ("R5-E", 652.685791, 445.976990, 8),
+        ("R4-E", 634.114929, 444.812256, 8),
+        ("L6-E", 178.973175, 442.229858, 8),
+        ("L5-E", 160.402298, 442.229858, 8),
+        ("L4-2", 142.578537, 442.229858, 8),
+        ("L3-E", 179.973175, 366.111084, 8),
+        ("L2-E", 159.567047, 365.111084, 8),
+        ("L1-E", 142.996170, 364.693481, 8),
+        ("D", 444.394623, 364.528717, 9),
+        ("C", 444.394623, 442.229858, 9),
+        ("B", 368.275848, 441.229858, 9),
+        ("A", 367.858215, 364.528717, 9)
+    ];
+    var lvMap = new LvWaferMap() {
+        _id = ObjectId.GenerateNewId(),
+        Size = 2,
+        Pads = lv_pads.Select(e => new LvMapPad() {
+            Identifier = e.id,
+            X = e.x,
+            Y = e.y,
+            Radius = e.rad
+        }).ToList()
+    };
+    await collection.InsertOneAsync(lvMap);
 }
 
-async Task UpdateMeasurementWaferSize() {
+
+async Task UpdateQuickTestWaferSize() {
     var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
     var database = mongoClient.GetDatabase("quick_test_db");
     var qtCollection = database.GetCollection<QuickTestResult>("quick_test");

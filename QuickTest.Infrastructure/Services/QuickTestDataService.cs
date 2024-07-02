@@ -246,6 +246,86 @@ public class QuickTestDataService {
         }
     }
     
+    public async Task<Dictionary<string,PadMeasurementDto>> GetLabViewResult(string waferId, MeasurementType type) {
+        var qt = await this._qtCollection.Find(e => e.WaferId == waferId)
+            .FirstOrDefaultAsync();
+        if(qt==null) {
+            Dictionary<string, PadMeasurementDto> lvMeasurements = new Dictionary<string, PadMeasurementDto>();
+            foreach (var pad in PadLocation.List.Select(e => e.Value)) {
+                lvMeasurements[pad] = new PadMeasurementDto() {
+                    PadLocation = pad,
+                    ActualPad = "",
+                    Wl = 0.00,
+                    Power = 0.00,
+                    Voltage = 0.00,
+                    Knee = 0.00,
+                    Ir = 0.00
+                };
+            }
+           
+            return lvMeasurements;
+        }
+        //List<QtMeasurement> measurements;
+        Dictionary<string,PadMeasurement> measurements;
+        StringBuilder builder = new StringBuilder();
+        if (type == MeasurementType.Initial) {
+            measurements=await this._initMeasureCollection
+                .Find(e => e.QuickTestResultId==qt._id && e.Current==20)
+                .Project(e=>e.Measurements)
+                .FirstOrDefaultAsync();
+
+        } else {
+            measurements=await this._finalMeasureCollection
+                .Find(e => e.QuickTestResultId==qt._id && e.Current==20)
+                .Project(e=>e.Measurements)
+                .FirstOrDefaultAsync();
+
+        }
+        if (measurements.Any()) {
+            Dictionary<string,PadMeasurementDto> lvMeasurements = new Dictionary<string, PadMeasurementDto>();
+            foreach (var pad in PadLocation.List.Select(e=>e.Value)) {
+                if (measurements.ContainsKey(pad)) {
+                    lvMeasurements[pad]=new PadMeasurementDto() {
+                        PadLocation = pad,
+                        ActualPad = measurements[pad].ActualPad,
+                        Wl = Math.Round(measurements[pad].Wl, 2),
+                        Power = Math.Round(measurements[pad].Power, 2),
+                        Voltage = Math.Round(measurements[pad].Voltage, 2),
+                        Knee = measurements[pad].Knee,
+                        Ir = measurements[pad].Ir
+                    };
+                } else {
+                    double zero = 0.00;
+                    lvMeasurements[pad] = new PadMeasurementDto() {
+                        PadLocation = pad,
+                        ActualPad = "",
+                        Wl = zero,
+                        Power = zero,
+                        Voltage = zero,
+                        Knee = zero,
+                        Ir = zero
+                    };
+                }
+            }
+            return lvMeasurements;
+        } else {
+            Dictionary<string,PadMeasurementDto> lvMeasurements = new Dictionary<string, PadMeasurementDto>();
+            double zero = 0.00;
+            foreach (var pad in PadLocation.List.Select(e => e.Value)) {
+                lvMeasurements[pad] = new PadMeasurementDto() {
+                    PadLocation = pad,
+                    ActualPad = "",
+                    Wl = zero,
+                    Power = zero,
+                    Voltage = zero,
+                    Knee = zero,
+                    Ir = zero
+                };
+            }
+            return lvMeasurements;
+        }
+    }
+    
     private static void GetPadMeasurement(Dictionary<string,PadMeasurement> measurements, List<string> values) {
         foreach (var pad in PadLocation.List) {
             if (measurements.ContainsKey(pad)) {
