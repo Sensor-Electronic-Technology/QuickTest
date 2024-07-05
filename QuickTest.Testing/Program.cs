@@ -41,7 +41,9 @@ await CreateWaferMaps();*/
 
 //await UpdateQuickTestWaferSize();
 
-await CreateLvWaferMap();
+//await CreateLvWaferMap();
+
+
 
 async Task CreateLvWaferMap() {
     var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");

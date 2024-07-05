@@ -10,6 +10,7 @@ using QuickTest.Data.AppSettings;
 using QuickTest.Data.Models.Measurements;
 using ErrorOr;
 using MongoDB.Bson;
+using QuickTest.Data.Contracts.Requests.Put;
 using QuickTest.Data.DataTransfer;
 using QuickTest.Data.Models;
 using QuickTest.Data.Models.Wafers.Enums;
@@ -90,7 +91,7 @@ public class QuickTestDataService {
         return await this.QtWaferExists(waferId);
     }
     
-    public async Task<bool> InsertMeasurement(MeasurementDto measurement) {
+    public async Task<ErrorOr<Success>>InsertMeasurement(InsertMeasurementRequest measurement) {
         QtMeasurement? qtMeasurement;
         if (measurement.MeasurementType == (int)MeasurementType.Initial) {
             qtMeasurement = await this._initMeasureCollection
@@ -102,10 +103,10 @@ public class QuickTestDataService {
                 .FirstOrDefaultAsync();
         }
         if (qtMeasurement != null) {
-            var pad = PadLocation.List.FirstOrDefault(e => measurement.Pad!.Contains(e));
+            var pad = PadLocation.List.FirstOrDefault(e => measurement.PadLocation!.Contains(e));
             if(pad!=null) {
                 qtMeasurement.Measurements[pad.Value]=new PadMeasurement() {
-                    ActualPad = measurement.Pad!,
+                    ActualPad = measurement.PadLocation!,
                     Wl = measurement.Wl,
                     Power = measurement.Power,
                     Voltage = measurement.Voltage,
@@ -116,42 +117,111 @@ public class QuickTestDataService {
                     .Set(e=>e.Measurements,qtMeasurement.Measurements);
                 if (measurement.MeasurementType == (int)MeasurementType.Initial) {
                     await this._initMeasureCollection.UpdateOneAsync(e=>e._id==qtMeasurement._id,update);
-                    return true;
+                    return Result.Success;
                 } else {
                     await this._finalMeasureCollection.UpdateOneAsync(e=>e._id==qtMeasurement._id,update);
-                    return true;
+                    return Result.Success;
                 }
             }
-            return false;
+            return Error.NotFound(description: "Failed to find pad in database");
         } else {
+            var qtResult=await this._qtCollection
+                .Find(e=>e.WaferId==measurement.WaferId)
+                .FirstOrDefaultAsync();
+            if(qtResult==null) {
+                return Error.NotFound(description: $"QuickTestResult for {measurement.WaferId} not found in database");
+            }
             qtMeasurement=new QtMeasurement() {
                 _id = ObjectId.GenerateNewId(),
                 WaferId = measurement.WaferId!,
                 Current = measurement.Current,
+                QuickTestResultId = qtResult._id,
                 Measurements = new Dictionary<string, PadMeasurement>()
             };
-            var pad = PadLocation.List.FirstOrDefault(e => measurement.Pad!.Contains(e));
+            var pad = PadLocation.List.FirstOrDefault(e => measurement.PadLocation!.Contains(e));
             if(pad!=null) {
                 qtMeasurement.Measurements.Add(pad.Value,new PadMeasurement() {
-                    ActualPad = measurement.Pad!,
+                    ActualPad = measurement.PadLocation!,
                     Wl = measurement.Wl,
                     Power = measurement.Power,
                     Voltage = measurement.Voltage,
                     Knee = measurement.Knee,
                     Ir = measurement.Ir
                 });
+                if (measurement.MeasurementType == (int)MeasurementType.Initial) {
+                    await this._initMeasureCollection.InsertOneAsync(qtMeasurement);
+                    return Result.Success;
+                } else {
+                    await this._finalMeasureCollection.InsertOneAsync(qtMeasurement);
+                    return Result.Success;
+                }
             }
-            var update=Builders<QtMeasurement>.Update
-                .Set(e=>e.Measurements,qtMeasurement.Measurements);
-            if (measurement.MeasurementType == (int)MeasurementType.Initial) {
-                await this._initMeasureCollection.UpdateOneAsync(e=>e._id==qtMeasurement._id,update);
-                return true;
-            } else {
-                await this._finalMeasureCollection.UpdateOneAsync(e=>e._id==qtMeasurement._id,update);
-                return true;
-            }
+            return Error.NotFound(description: "Failed to find pad in database");
+
         }
-        return false;
+    }
+    
+    public async Task<ErrorOr<Success>> InsertSpectrumMeasurement(InsertSpectrumMeasurementRequest measurement) {
+        Spectrum? spectrumMeasurement;
+        if (measurement.MeasurementType == (int)MeasurementType.Initial) {
+            spectrumMeasurement = await this._initSpectrumCollection
+                .Find(e=>e.WaferId==measurement.WaferId && e.Current==measurement.Current)
+                .FirstOrDefaultAsync();
+        } else {
+            spectrumMeasurement = await this._finalSpectrumCollection
+                .Find(e=>e.WaferId==measurement.WaferId && e.Current==measurement.Current)
+                .FirstOrDefaultAsync();
+        }
+        if (spectrumMeasurement != null) {
+            var pad = PadLocation.List.FirstOrDefault(e => measurement.PadLocation!.Contains(e));
+            if(pad!=null) {
+                spectrumMeasurement.Measurements[pad.Value] = new PadSpectrumMeasurement() {
+                    ActualPad = measurement.ActualPad ?? "", 
+                    Wl = measurement.Wl, 
+                    Intensity = measurement.Intensity
+                };
+                var update=Builders<Spectrum>.Update
+                    .Set(e=>e.Measurements,spectrumMeasurement.Measurements);
+                if (measurement.MeasurementType == (int)MeasurementType.Initial) {
+                    await this._initSpectrumCollection.UpdateOneAsync(e=>e._id==spectrumMeasurement._id,update);
+                    return Result.Success;
+                } else {
+                    await this._finalSpectrumCollection.UpdateOneAsync(e=>e._id==spectrumMeasurement._id,update);
+                    return Result.Success;
+                }
+            }
+            return Error.NotFound(description: "Failed to find pad in database");
+        } else {
+            var qtResult=await this._qtCollection
+                .Find(e=>e.WaferId==measurement.WaferId)
+                .FirstOrDefaultAsync();
+            if(qtResult==null) {
+                return Error.NotFound(description: $"QuickTestResult for {measurement.WaferId} not found in database");
+            }
+            spectrumMeasurement=new Spectrum() {
+                _id = ObjectId.GenerateNewId(),
+                WaferId = measurement.WaferId!,
+                Current = measurement.Current,
+                QuickTestResultId = qtResult._id,
+                Measurements = new Dictionary<string, PadSpectrumMeasurement>()
+            };
+            var pad = PadLocation.List.FirstOrDefault(e => measurement.PadLocation!.Contains(e));
+            if(pad!=null) {
+                spectrumMeasurement.Measurements.Add(pad.Value,new PadSpectrumMeasurement() {
+                    ActualPad = measurement.ActualPad ?? "", 
+                    Wl = measurement.Wl, 
+                    Intensity = measurement.Intensity
+                });
+                if (measurement.MeasurementType == (int)MeasurementType.Initial) {
+                    await this._initSpectrumCollection.InsertOneAsync(spectrumMeasurement);
+                    return Result.Success;
+                } else {
+                    await this._finalSpectrumCollection.InsertOneAsync(spectrumMeasurement);
+                    return Result.Success;
+                }
+            }
+            return Error.NotFound(description: "Failed to find pad in database");
+        }
     }
     
     public Task<bool> QtWaferExists(string waferId) {

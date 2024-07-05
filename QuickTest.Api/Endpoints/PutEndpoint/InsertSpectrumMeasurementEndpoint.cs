@@ -1,18 +1,16 @@
-﻿using System.Text;
+using System.Text;
 using FastEndpoints;
 using QuickTest.Data.Constants;
 using QuickTest.Data.Contracts.Requests.Put;
 using QuickTest.Data.Contracts.Responses.Put;
-using QuickTest.Data.Models.Measurements;
 using QuickTest.Infrastructure.Services;
 
 namespace QuickTest.Api.Endpoints.PutEndpoint;
 
-
-public class InsertMeasurementEndpoint:Endpoint<InsertMeasurementRequest, InsertMeasurementResponse> {
+public class InsertSpectrumMeasurementEndpoint:Endpoint<InsertSpectrumMeasurementRequest, InsertSpectrumMeasurementResponse> {
     private readonly QuickTestDataService _qtDataService;
 
-    public InsertMeasurementEndpoint(QuickTestDataService qtDataService) {
+    public InsertSpectrumMeasurementEndpoint(QuickTestDataService qtDataService) {
         this._qtDataService = qtDataService;
     }
 
@@ -21,7 +19,7 @@ public class InsertMeasurementEndpoint:Endpoint<InsertMeasurementRequest, Insert
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(InsertMeasurementRequest req, CancellationToken ct) {
+    public override async Task HandleAsync(InsertSpectrumMeasurementRequest req, CancellationToken ct) {
         StringBuilder builder = new StringBuilder();
         bool error = false;
         if(string.IsNullOrWhiteSpace(req.WaferId)) {
@@ -37,24 +35,23 @@ public class InsertMeasurementEndpoint:Endpoint<InsertMeasurementRequest, Insert
             builder.AppendLine("ActualPad cannot be null or empty");
         }
         if (error) {
-            await SendAsync(new InsertMeasurementResponse() {
+            await SendAsync(new InsertSpectrumMeasurementResponse() {
                 Success = false,
                 Errors=builder.ToString()
             },cancellation:ct);
         } else {
-            var result = await this._qtDataService.InsertMeasurement(req);
+            var result = await this._qtDataService.InsertSpectrumMeasurement(req);
             if (result.IsError) {
-                await SendAsync(new InsertMeasurementResponse() {
+                await SendAsync(new InsertSpectrumMeasurementResponse() {
                     Success = false,
                     Errors =result.FirstError.Description
                 },cancellation:ct);
             } else {
-                await SendAsync(new InsertMeasurementResponse() {
+                await SendAsync(new InsertSpectrumMeasurementResponse() {
                     Success = true,
                     Errors = ""
                 },cancellation:ct);
             }
         }
-        
     }
 }
