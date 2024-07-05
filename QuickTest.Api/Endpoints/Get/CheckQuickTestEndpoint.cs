@@ -15,7 +15,7 @@ public class CheckQuickTestEndpoint:Endpoint<CheckQuickTestRequest, CheckQuickTe
     }
 
     public override void Configure() {
-        Get(QtApiPaths.CheckQuickTestPath+"{checkRequest}");
+        Get(QtApiPaths.CheckQuickTestPath+"{waferId}");
         AllowAnonymous();
     }
 
@@ -23,10 +23,10 @@ public class CheckQuickTestEndpoint:Endpoint<CheckQuickTestRequest, CheckQuickTe
         if (string.IsNullOrEmpty(req.WaferId)) {
             ThrowError("WaferId cannot be null or empty");
         }
-
+        Console.WriteLine(req.WaferId);
         var result = await this._qtDataService.CheckQuickTest(req.WaferId, (MeasurementType)req.MeasurementType);
         await SendAsync(new CheckQuickTestResponse() {
-            Exists = result.Tested, 
+            Exists = result.Exisits, 
             StationId = result.StationId, 
             Tested = result.Tested
         }, cancellation: ct);
