@@ -15,7 +15,7 @@ public class InsertSpectrumMeasurementEndpoint:Endpoint<InsertSpectrumMeasuremen
     }
 
     public override void Configure() {
-        Put(QtApiPaths.InsertMeasurementPath);
+        Put(QtApiPaths.InsertSpectrumMeasurementPath);
         AllowAnonymous();
     }
 

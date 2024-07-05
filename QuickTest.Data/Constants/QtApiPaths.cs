@@ -25,9 +25,7 @@ public static class QtApiPaths {
     public static string CheckQuickTestPath => "/api/quick-tests/check/";
     public static string MarkTestedPath => "/api/quick-tests/mark-tested/";
     public static string InsertMeasurementPath => "/api/results/insert/";
-    
-    public static string MarkInitialCompleted => "/api/results/initial/mark-completed/";
-    public static string MarkFinalCompleted => "/api/results/final/mark-completed/";
+    public static string InsertSpectrumMeasurementPath => "/api/results/spectrum/insert/";
     
     public static string GetQuickTestListSincePath => "/api/quick-tests/list-since/";
     
