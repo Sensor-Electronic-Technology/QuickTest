@@ -42,7 +42,6 @@ GET {{Remote.Api_HostAddress}}/api/quick-test/exists/B01-4110-14
 Accept: application/json
 
 ### GET request test
-
 GET {{Remote.Api_HostAddress}}/api/map/2
 Accept: application/json
 
@@ -59,5 +58,5 @@ GET {{QuickTest.Api_HostAddress}}/api/results/labview/B01-4110-14?1
 Accept: application/json
 
 ### GET request test
-GET {{QuickTest.Api_HostAddress}}/api/quick-tests/check/B01-4110-14?1
+GET {{Remote.Api_HostAddress}}/api/quick-tests/check/B01-4110-14?1
 Accept: application/json

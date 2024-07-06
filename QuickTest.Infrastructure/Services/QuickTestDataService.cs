@@ -78,7 +78,7 @@ public class QuickTestDataService {
                 .Set(e => e.FinalTested, tested)
                 .Set(e=>e.FinalTimeStamp,tested ? DateTime.Now:DateTime.MinValue);
             this._logger.LogInformation("Updated {Wafer} FinalTested to {Tested}",waferId,tested);
-            await this._qtCollection.UpdateOneAsync(filter,update);
+            var result=await this._qtCollection.UpdateOneAsync(filter,update);
         }
     }
 
@@ -335,9 +335,7 @@ public class QuickTestDataService {
            
             return lvMeasurements;
         }
-        //List<QtMeasurement> measurements;
         Dictionary<string,PadMeasurement> measurements;
-        StringBuilder builder = new StringBuilder();
         if (type == MeasurementType.Initial) {
             measurements=await this._initMeasureCollection
                 .Find(e => e.QuickTestResultId==qt._id && e.Current==20)
