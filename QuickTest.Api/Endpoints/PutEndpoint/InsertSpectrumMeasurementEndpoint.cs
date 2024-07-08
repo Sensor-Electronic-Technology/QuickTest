@@ -7,7 +7,7 @@ using QuickTest.Infrastructure.Services;
 
 namespace QuickTest.Api.Endpoints.PutEndpoint;
 
-public class InsertSpectrumMeasurementEndpoint:Endpoint<InsertSpectrumMeasurementRequest, InsertSpectrumMeasurementResponse> {
+/*public class InsertSpectrumMeasurementEndpoint:Endpoint<InsertSpectrumMeasurementRequest, InsertSpectrumMeasurementResponse> {
     private readonly QuickTestDataService _qtDataService;
 
     public InsertSpectrumMeasurementEndpoint(QuickTestDataService qtDataService) {
@@ -54,4 +54,4 @@ public class InsertSpectrumMeasurementEndpoint:Endpoint<InsertSpectrumMeasuremen
             }
         }
     }
-}
+}*/
