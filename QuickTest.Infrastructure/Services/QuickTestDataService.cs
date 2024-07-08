@@ -108,12 +108,12 @@ public class QuickTestDataService {
             }
         }
         
-        foreach (var measurement in request.SpectrumMeasurements) {
+        /*foreach (var measurement in request.SpectrumMeasurements) {
             var result=await this.InsertSpectrumMeasurement(measurement,(MeasurementType)request.MeasurementType,request.WaferId!,request.PadLocation!,request.ActualPad!);
             if (result.IsError) {
                 errors.Add(result.FirstError);
             }
-        }
+        }*/
         return errors.Any() ? errors : Result.Success;
     }
     

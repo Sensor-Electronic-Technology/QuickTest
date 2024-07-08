@@ -3,7 +3,7 @@ using FastEndpoints;
 using QuickTest.Data.Constants;
 using QuickTest.Data.Contracts.Requests.Put;
 using QuickTest.Data.Contracts.Responses.Put;
-using QuickTest.Data.Models.Measurements;
+using QuickTest.Data.Events;
 using QuickTest.Infrastructure.Services;
 
 namespace QuickTest.Api.Endpoints.PutEndpoint;
@@ -55,6 +55,14 @@ public class InsertMeasurementEndpoint:Endpoint<InsertMeasurementRequest, Insert
                     Errors =result.FirstError.Description
                 },cancellation:ct);
             } else {
+                await PublishAsync(
+                    new MeasurementInsertedEvent() {
+                        SpectrumMeasurements = req.SpectrumMeasurements,
+                        WaferId = req.WaferId,
+                        MeasurementType = req.MeasurementType,
+                        ActualPad = req.ActualPad,
+                        PadLocation = req.PadLocation
+                    },Mode.WaitForNone, cancellation: ct);
                 await SendAsync(new InsertMeasurementResponse() {
                     Success = true,
                     Errors = ""
