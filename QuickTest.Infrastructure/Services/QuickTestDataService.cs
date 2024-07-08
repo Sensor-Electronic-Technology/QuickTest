@@ -81,6 +81,14 @@ public class QuickTestDataService {
             var result=await this._qtCollection.UpdateOneAsync(filter,update);
         }
     }
+    
+    public async Task DeleteQuickTest(string waferId) {
+        await this._qtCollection.DeleteOneAsync(e => e.WaferId == waferId);
+        await this._initMeasureCollection.DeleteManyAsync(e => e.WaferId == waferId);
+        await this._finalMeasureCollection.DeleteManyAsync(e => e.WaferId == waferId);
+        await this._initSpectrumCollection.DeleteManyAsync(e => e.WaferId == waferId);
+        await this._finalSpectrumCollection.DeleteManyAsync(e => e.WaferId == waferId);
+    }
 
     public async Task<ErrorOr<bool>> CreateQuickTest(string waferId,int stationId) {
         if (await this.QtWaferExists(waferId)) {

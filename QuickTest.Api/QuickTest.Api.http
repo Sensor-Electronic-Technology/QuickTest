@@ -60,3 +60,12 @@ Accept: application/json
 ### GET request test
 GET {{Remote.Api_HostAddress}}/api/quick-tests/check/B01-4110-14?1
 Accept: application/json
+
+
+### POST request to create a new quick-test
+POST {{Remote.Api_HostAddress}}/api/quick-tests/create/B09-0001-11?1
+Accept: application/json
+
+### Delete quick test
+DELETE {{Remote.Api_HostAddress}}/api/quick-tests/delete/B09-0001-11
+Accept: application/json

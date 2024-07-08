@@ -20,12 +20,12 @@ public static class QtApiPaths {
     #endregion
     
     
-    public static string GetQuickTestsPath => "/api/quick-tests/";
     public static string CreateQuickTestPath => "/api/quick-tests/create/";
     public static string CheckQuickTestPath => "/api/quick-tests/check/";
     public static string MarkTestedPath => "/api/quick-tests/mark-tested/";
     public static string InsertMeasurementPath => "/api/results/insert/";
-    public static string InsertSpectrumMeasurementPath => "/api/results/spectrum/insert/";
+    
+    public static string DeleteQuickTestPath => "/api/quick-tests/delete/";
     
     public static string GetQuickTestListSincePath => "/api/quick-tests/list-since/";
     
