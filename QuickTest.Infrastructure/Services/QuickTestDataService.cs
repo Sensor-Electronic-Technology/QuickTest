@@ -94,7 +94,7 @@ public class QuickTestDataService {
         if (await this.QtWaferExists(waferId)) {
             return true;
         }
-        QuickTestResult qt = new QuickTestResult() { _id = ObjectId.GenerateNewId(), WaferId = waferId };
+        QuickTestResult qt = new QuickTestResult() { _id = ObjectId.GenerateNewId(), WaferId = waferId,ProbeStationId = stationId};
         await this._qtCollection.InsertOneAsync(qt);
         return await this.QtWaferExists(waferId);
     }

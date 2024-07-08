@@ -67,5 +67,5 @@ POST {{Remote.Api_HostAddress}}/api/quick-tests/create/B09-0001-11?1
 Accept: application/json
 
 ### Delete quick test
-DELETE {{Remote.Api_HostAddress}}/api/quick-tests/delete/B09-0001-11
+DELETE {{Remote.Api_HostAddress}}/api/quick-tests/delete/B01-0940-14
 Accept: application/json
