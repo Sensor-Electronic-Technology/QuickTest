@@ -17,7 +17,8 @@ public class MeasurementInsertedEventHandler:IEventHandler<MeasurementInsertedEv
     }
     public async Task HandleAsync(MeasurementInsertedEvent eventModel, CancellationToken ct) {
         foreach (var measurement in eventModel.SpectrumMeasurements) {
-            await this._qtDataService.InsertSpectrumMeasurement(measurement,(MeasurementType)eventModel.MeasurementType,eventModel.WaferId, eventModel.PadLocation, eventModel.ActualPad);
+            await this._qtDataService.InsertSpectrumMeasurement(measurement,(MeasurementType)eventModel.MeasurementType,
+                eventModel.WaferId, eventModel.PadLocation, eventModel.ActualPad);
             this._logger.LogInformation("Inserted Spectrum Measurement for {WaferId}",eventModel.WaferId);
         }
     }

@@ -101,19 +101,15 @@ public class QuickTestDataService {
 
     public async Task<ErrorOr<Success>> InsertAllMeasurements(InsertMeasurementRequest request) {
         List<Error> errors = [];
+        
         foreach (var measurement in request.Measurements) {
-            var result=await this.InsertMeasurement(measurement,(MeasurementType)request.MeasurementType,request.WaferId!,request.PadLocation!,request.ActualPad!);
+            var result=await this.InsertMeasurement(measurement,
+                (MeasurementType)request.MeasurementType,
+                request.WaferId!,request.PadLocation!,request.ActualPad!);
             if (result.IsError) {
                 errors.Add(result.FirstError);
             }
         }
-        
-        /*foreach (var measurement in request.SpectrumMeasurements) {
-            var result=await this.InsertSpectrumMeasurement(measurement,(MeasurementType)request.MeasurementType,request.WaferId!,request.PadLocation!,request.ActualPad!);
-            if (result.IsError) {
-                errors.Add(result.FirstError);
-            }
-        }*/
         return errors.Any() ? errors : Result.Success;
     }
     
