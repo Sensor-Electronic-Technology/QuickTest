@@ -11,4 +11,14 @@ public class QuickTestResult {
     public DateTime InitialTimeStamp { get; set; }
     public bool FinalTested { get; set; }
     public DateTime FinalTimeStamp { get; set; }
+    
+    public ObjectId Initial20MeasurementId { get; set; }
+    public ObjectId Initial50MeasurementId { get; set; }
+    public ObjectId Final20MeasurementId { get; set; }
+    public ObjectId Final50MeasurementId { get; set; }
+    
+    public ObjectId Initial20SpectMeasurementId { get; set; }
+    public ObjectId Initial50SpectMeasurementId { get; set; }
+    public ObjectId FinalSpect20MeasurementId { get; set; }
+    public ObjectId FinalSpect50MeasurementId { get; set; }
 }
