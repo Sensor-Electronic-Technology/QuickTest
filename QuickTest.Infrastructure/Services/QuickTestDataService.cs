@@ -212,7 +212,7 @@ public class QuickTestDataService {
             } else {
                 var id=(measurement.Current==20) ? qtResult.Final20MeasurementId:qtResult.Final50MeasurementId;
                 var result=await this.InsertMeasurement(measurement,
-                    id,MeasurementType.Initial,
+                    id,MeasurementType.Final,
                     request.WaferId!,request.PadLocation!,request.ActualPad!);
                 if (result.IsError) {
                     errors.Add(result.FirstError);
@@ -234,7 +234,7 @@ public class QuickTestDataService {
             } else {
                 var id=(measurement.Current==20) ? qtResult.FinalSpect20MeasurementId:qtResult.FinalSpect50MeasurementId;
                 var result=await this.InsertSpectrumMeasurement(measurement,
-                    id,MeasurementType.Initial,
+                    id,MeasurementType.Final,
                     request.WaferId!,request.PadLocation!,request.ActualPad!);
                 if (result.IsError) {
                     errors.Add(result.FirstError);
