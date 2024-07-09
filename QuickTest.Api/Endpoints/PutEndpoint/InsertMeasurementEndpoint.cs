@@ -55,6 +55,10 @@ public class InsertMeasurementEndpoint:Endpoint<InsertMeasurementRequest, Insert
                     Errors =result.FirstError.Description
                 },cancellation:ct);
             } else {
+                await SendAsync(new InsertMeasurementResponse() {
+                    Success = true,
+                    Errors = ""
+                },cancellation:ct);
                 await PublishAsync(
                     new MeasurementInsertedEvent() {
                         SpectrumMeasurements = req.SpectrumMeasurements,
@@ -62,11 +66,7 @@ public class InsertMeasurementEndpoint:Endpoint<InsertMeasurementRequest, Insert
                         MeasurementType = req.MeasurementType,
                         ActualPad = req.ActualPad,
                         PadLocation = req.PadLocation
-                    },Mode.WaitForNone, cancellation: ct);
-                await SendAsync(new InsertMeasurementResponse() {
-                    Success = true,
-                    Errors = ""
-                },cancellation:ct);
+                    },Mode.WaitForAll, cancellation: ct);
             }
         }
     }
