@@ -83,11 +83,27 @@ public class QuickTestDataService {
     }
     
     public async Task DeleteQuickTest(string waferId) {
-        await this._qtCollection.DeleteOneAsync(e => e.WaferId == waferId);
-        await this._initMeasureCollection.DeleteManyAsync(e => e.WaferId == waferId);
+        var quickTest=await this._qtCollection.Find(e=>e.WaferId==waferId)
+            .FirstOrDefaultAsync();
+        if(quickTest==null) {
+            return;
+        }
+        await this._qtCollection.DeleteOneAsync(e=>e.WaferId==waferId);
+        await this._initMeasureCollection.DeleteOneAsync(e => e._id == quickTest.Initial20MeasurementId);
+        await this._initMeasureCollection.DeleteOneAsync(e => e._id == quickTest.Initial20MeasurementId);
+        
+        await this._initMeasureCollection.DeleteOneAsync(e => e._id == quickTest.Final20MeasurementId);
+        await this._initMeasureCollection.DeleteOneAsync(e => e._id == quickTest.Final50MeasurementId);
+        
+        await this._initMeasureCollection.DeleteOneAsync(e => e._id == quickTest.Initial20SpectMeasurementId);
+        await this._initMeasureCollection.DeleteOneAsync(e => e._id == quickTest.Initial50SpectMeasurementId);
+        
+        await this._initMeasureCollection.DeleteOneAsync(e => e._id == quickTest.FinalSpect20MeasurementId);
+        await this._initMeasureCollection.DeleteOneAsync(e => e._id == quickTest.FinalSpect50MeasurementId);
+        /*await this._initMeasureCollection.DeleteManyAsync(e => e.WaferId == waferId);
         await this._finalMeasureCollection.DeleteManyAsync(e => e.WaferId == waferId);
         await this._initSpectrumCollection.DeleteManyAsync(e => e.WaferId == waferId);
-        await this._finalSpectrumCollection.DeleteManyAsync(e => e.WaferId == waferId);
+        await this._finalSpectrumCollection.DeleteManyAsync(e => e.WaferId == waferId);*/
     }
 
     public async Task<ErrorOr<bool>> CreateQuickTest(string waferId,int stationId) {
@@ -165,6 +181,12 @@ public class QuickTestDataService {
         await this._finalMeasureCollection.InsertOneAsync(finalMeasurement);
         await this._initSpectrumCollection.InsertOneAsync(initSpectrum);
         await this._finalSpectrumCollection.InsertOneAsync(finalSpectrum);
+        
+        
+        await this._initMeasureCollection.InsertOneAsync(init50Measurement);
+        await this._finalMeasureCollection.InsertOneAsync(final50Measurement);
+        await this._initSpectrumCollection.InsertOneAsync(init50Spectrum);
+        await this._finalSpectrumCollection.InsertOneAsync(final50Spectrum);
         return await this.QtWaferExists(waferId);
     }
 
@@ -201,7 +223,7 @@ public class QuickTestDataService {
         
         foreach (var measurement in request.SpectrumMeasurements) {
             if (request.MeasurementType == (int)MeasurementType.Initial) {
-                var id=(measurement.Current==20) ? qtResult.Initial20MeasurementId:qtResult.Initial50MeasurementId;
+                var id=(measurement.Current==20) ? qtResult.Initial20SpectMeasurementId:qtResult.Initial50SpectMeasurementId;
                 var result=await this.InsertSpectrumMeasurement(measurement,
                     id,
                     MeasurementType.Initial,
@@ -210,7 +232,7 @@ public class QuickTestDataService {
                     errors.Add(result.FirstError);
                 }
             } else {
-                var id=(measurement.Current==20) ? qtResult.Final20MeasurementId:qtResult.Final50MeasurementId;
+                var id=(measurement.Current==20) ? qtResult.FinalSpect20MeasurementId:qtResult.FinalSpect50MeasurementId;
                 var result=await this.InsertSpectrumMeasurement(measurement,
                     id,MeasurementType.Initial,
                     request.WaferId!,request.PadLocation!,request.ActualPad!);
@@ -218,7 +240,6 @@ public class QuickTestDataService {
                     errors.Add(result.FirstError);
                 }
             }
-
         }
         return errors.Any() ? errors : Result.Success;
     }
