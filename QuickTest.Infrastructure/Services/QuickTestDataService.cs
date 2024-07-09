@@ -170,48 +170,68 @@ public class QuickTestDataService {
 
     public async Task<ErrorOr<Success>> InsertAllMeasurements(InsertMeasurementRequest request) {
         List<Error> errors = [];
+        var qtResult=await this._qtCollection
+            .Find(e=>e.WaferId==request.WaferId)
+            .FirstOrDefaultAsync();
+        if(qtResult==null) {
+            return Error.NotFound(description: $"QuickTestResult for {request.WaferId} not found in database");
+        }
+        
         foreach (var measurement in request.Measurements) {
-            var result=await this.InsertMeasurement(measurement,
-                (MeasurementType)request.MeasurementType,
-                request.WaferId!,request.PadLocation!,request.ActualPad!,
-                measurement.Current);
-            if (result.IsError) {
-                errors.Add(result.FirstError);
+            if (request.MeasurementType == (int)MeasurementType.Initial) {
+                var id=(measurement.Current==20) ? qtResult.Initial20MeasurementId:qtResult.Initial50MeasurementId;
+                var result=await this.InsertMeasurement(measurement,
+                    id,
+                    MeasurementType.Initial,
+                    request.WaferId!,request.PadLocation!,request.ActualPad!);
+                if (result.IsError) {
+                    errors.Add(result.FirstError);
+                }
+            } else {
+                var id=(measurement.Current==20) ? qtResult.Final20MeasurementId:qtResult.Final50MeasurementId;
+                var result=await this.InsertMeasurement(measurement,
+                    id,MeasurementType.Initial,
+                    request.WaferId!,request.PadLocation!,request.ActualPad!);
+                if (result.IsError) {
+                    errors.Add(result.FirstError);
+                }
             }
+
+        }
+        
+        foreach (var measurement in request.SpectrumMeasurements) {
+            if (request.MeasurementType == (int)MeasurementType.Initial) {
+                var id=(measurement.Current==20) ? qtResult.Initial20MeasurementId:qtResult.Initial50MeasurementId;
+                var result=await this.InsertSpectrumMeasurement(measurement,
+                    id,
+                    MeasurementType.Initial,
+                    request.WaferId!,request.PadLocation!,request.ActualPad!);
+                if (result.IsError) {
+                    errors.Add(result.FirstError);
+                }
+            } else {
+                var id=(measurement.Current==20) ? qtResult.Final20MeasurementId:qtResult.Final50MeasurementId;
+                var result=await this.InsertSpectrumMeasurement(measurement,
+                    id,MeasurementType.Initial,
+                    request.WaferId!,request.PadLocation!,request.ActualPad!);
+                if (result.IsError) {
+                    errors.Add(result.FirstError);
+                }
+            }
+
         }
         return errors.Any() ? errors : Result.Success;
     }
     
-    public async Task<ErrorOr<Success>>InsertMeasurement(CurrentMeasurementDto measurement,MeasurementType type,string waferId,string padLocation,string actualPad,int current) {
-        var qtResult=await this._qtCollection
-            .Find(e=>e.WaferId==waferId)
-            .FirstOrDefaultAsync();
-        if (qtResult == null) {
-            return Error.NotFound(description: $"Quick test entry not found for WaferId {qtResult.WaferId}");
-        }
+    public async Task<ErrorOr<Success>>InsertMeasurement(CurrentMeasurementDto measurement,ObjectId measureId,MeasurementType type,string waferId,string padLocation,string actualPad) {
         QtMeasurement? qtMeasurement;
         if (type == MeasurementType.Initial) {
-            if (current == 20) {
-                qtMeasurement = await this._initMeasureCollection
-                    .Find(e => e._id==qtResult.Initial20MeasurementId)
-                    .FirstOrDefaultAsync();
-            } else {
-                qtMeasurement = await this._initMeasureCollection
-                    .Find(e => e._id==qtResult.Initial50MeasurementId)
-                    .FirstOrDefaultAsync();
-            }
+            qtMeasurement = await this._initMeasureCollection
+                .Find(e => e._id==measureId)
+                .FirstOrDefaultAsync();
         } else {
-            if (current == 20) {
-                qtMeasurement = await this._finalMeasureCollection
-                    .Find(e => e._id==qtResult.Final20MeasurementId)
-                    .FirstOrDefaultAsync();
-            } else {
-                qtMeasurement = await this._finalMeasureCollection
-                    .Find(e => e._id==qtResult.Final20MeasurementId)
-                    .FirstOrDefaultAsync();
-            }
             qtMeasurement = await this._finalMeasureCollection
-                .Find(e => e.WaferId == waferId && e.Current == measurement.Current)
+                .Find(e => e._id==measureId)
                 .FirstOrDefaultAsync();
         }
         if (qtMeasurement != null) {
@@ -240,37 +260,17 @@ public class QuickTestDataService {
         return Error.NotFound(description: "Failed to find measurement in database");
     }
     
-    public async Task<ErrorOr<Success>> InsertSpectrumMeasurement(SpectrumMeasureDto measurement,MeasurementType type,string waferId,string padLocation,string actualPad,int current) {
-        var qtResult=await this._qtCollection
-            .Find(e=>e.WaferId==waferId)
-            .FirstOrDefaultAsync();
-        if (qtResult == null) {
-            return Error.NotFound(description: $"Quick test entry not found for WaferId {qtResult.WaferId}");
-        }
+    public async Task<ErrorOr<Success>> InsertSpectrumMeasurement(SpectrumMeasureDto measurement,ObjectId measureId,MeasurementType type,string waferId,string padLocation,string actualPad) {
         Spectrum? spectrumMeasurement;
         if (type == (int)MeasurementType.Initial) {
-            if (current == 20) {
-                spectrumMeasurement = await this._initSpectrumCollection
-                    .Find(e=>e._id==qtResult.Initial20SpectMeasurementId)
-                    .FirstOrDefaultAsync();
-            } else {
-                spectrumMeasurement = await this._initSpectrumCollection
-                    .Find(e=>e._id==qtResult.Initial50SpectMeasurementId)
-                    .FirstOrDefaultAsync();
-            }
+            spectrumMeasurement = await this._initSpectrumCollection
+                .Find(e=>e._id==measureId)
+                .FirstOrDefaultAsync();
+
         } else {
             spectrumMeasurement = await this._finalSpectrumCollection
-                .Find(e=>e.WaferId==waferId && e.Current==measurement.Current)
+                .Find(e=>e._id==measureId)
                 .FirstOrDefaultAsync();
-            if (current == 20) {
-                spectrumMeasurement = await this._finalSpectrumCollection
-                    .Find(e=>e._id==qtResult.FinalSpect20MeasurementId)
-                    .FirstOrDefaultAsync();
-            } else {
-                spectrumMeasurement = await this._finalSpectrumCollection
-                    .Find(e=>e._id==qtResult.FinalSpect50MeasurementId)
-                    .FirstOrDefaultAsync();
-            }
         }
         if (spectrumMeasurement != null) {
             var pad = PadLocation.List.FirstOrDefault(e => padLocation!.Contains(e));
