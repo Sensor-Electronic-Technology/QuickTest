@@ -23,7 +23,7 @@ public class CreateQuickTestEndpoint:Endpoint<CreateQuickTestRequest, CreateQuic
             ThrowError("WaferId cannot be null or empty");
         }
 
-        var result = await this._qtDataService.CreateQuickTest(req.WaferId,req.ProbeStationId);
+        var result = await this._qtDataService.CreateQuickTest(req.WaferId,req.ProbeStationId,req.WaferSize);
         if (result.IsError) {
             await SendAsync(new CreateQuickTestResponse() {
                 Success = false,

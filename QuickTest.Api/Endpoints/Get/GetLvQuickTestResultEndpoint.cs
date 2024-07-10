@@ -24,8 +24,11 @@ public class GetLvQuickTestResultEndpoint:Endpoint<GetResultRequest,GetLvQuickTe
         if (string.IsNullOrEmpty(request.WaferId)) {
             ThrowError("WaferId cannot be null or empty");
         }
-        var measurements = await this._qtDataService.GetLabViewResult(request.WaferId,(MeasurementType)request.MeasurementType);
-        await SendAsync(new GetLvQuickTestResultResponse(){ Measurements = measurements },cancellation:cancellationToken);
+        var result = await this._qtDataService.GetLabViewResult(request.WaferId,(MeasurementType)request.MeasurementType);
+        await SendAsync(new GetLvQuickTestResultResponse() {
+            Measurements = result.measurments,
+            WaferSize = result.size==0 ? 2: result.size
+        },cancellation:cancellationToken);
 
     }
 }

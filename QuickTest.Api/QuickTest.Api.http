@@ -54,7 +54,7 @@ GET {{Remote.Api_HostAddress}}/api/quick-tests/list-since/1-1-2024
 Accept: application/json
 
 ### Get Labview Results
-GET {{QuickTest.Api_HostAddress}}/api/results/labview/B01-4110-14?1
+GET {{QuickTest.Api_HostAddress}}/api/results/labview/B10-2222-01?measurementType=1
 Accept: application/json
 
 ### GET request test

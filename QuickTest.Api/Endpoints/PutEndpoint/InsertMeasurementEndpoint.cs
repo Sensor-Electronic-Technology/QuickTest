@@ -59,14 +59,6 @@ public class InsertMeasurementEndpoint:Endpoint<InsertMeasurementRequest, Insert
                     Success = true,
                     Errors = ""
                 },cancellation:ct);
-                /*await PublishAsync(
-                    new MeasurementInsertedEvent() {
-                        SpectrumMeasurements = req.SpectrumMeasurements,
-                        WaferId = req.WaferId,
-                        MeasurementType = req.MeasurementType,
-                        ActualPad = req.ActualPad,
-                        PadLocation = req.PadLocation
-                    },Mode.WaitForAll, cancellation: ct);*/
             }
         }
     }
