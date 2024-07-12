@@ -52,8 +52,6 @@ await Migrate();
     }
 }*/
 
-
-
 async Task Migrate() {
     var context = new EpiContext();
     var clientWork=new MongoClient("mongodb://172.20.3.41:27017");
@@ -86,6 +84,7 @@ async Task Migrate() {
             _id = qtId,
             WaferId = wafer,
             ProbeStationId = 1,
+            WaferSize = 2,
             InitialTimeStamp = initMeasure.timeStamp,
             FinalTimeStamp = initMeasure.timeStamp,
         };
