@@ -80,6 +80,8 @@ async Task Migrate() {
         var qtId = ObjectId.GenerateNewId();
         var initMeasure = await CreateInitialMeasurements(context, wafer,qtId);
         var finalMeasure = await CreateFinalMeasurements(context, wafer,qtId);
+        var initSpectrum = await CreateInitialSpectrum(context, wafer, qtId);
+        var finalSpectrum=await CreateFinalSpectrum(context,wafer, qtId);
         var qt=new QuickTestResult() {
             _id = qtId,
             WaferId = wafer,
@@ -87,15 +89,22 @@ async Task Migrate() {
             WaferSize = 2,
             InitialTimeStamp = initMeasure.timeStamp,
             FinalTimeStamp = initMeasure.timeStamp,
+            Initial20MeasurementId = initMeasure._20mA._id,
+            Initial50MeasurementId = initMeasure._50mA._id,
+            Final20MeasurementId = finalMeasure._20mA._id,
+            Final50MeasurementId = finalMeasure._50mA._id,
         };
-        var initSpectrum = await CreateInitialSpectrum(context, wafer, qt._id);
-        var finalSpectrum=await CreateFinalSpectrum(context,wafer, qt._id);
+
         
         if(initSpectrum!=null) {
+            qt.Initial20SpectMeasurementId=initSpectrum.Value._20mA._id;
+            qt.Initial50SpectMeasurementId=initSpectrum.Value._50mA._id;
             initSpectrumResults.Add(initSpectrum.Value._20mA);
             initSpectrumResults.Add(initSpectrum.Value._50mA);
         }
         if(finalSpectrum!=null) {
+            qt.FinalSpect20MeasurementId=finalSpectrum.Value._20mA._id;
+            qt.FinalSpect50MeasurementId=finalSpectrum.Value._50mA._id;
             finalSpectResults.Add(finalSpectrum.Value._20mA);
             finalSpectResults.Add(finalSpectrum.Value._50mA);
         }
@@ -503,11 +512,13 @@ async Task<(Spectrum _20mA,Spectrum _50mA)?> CreateFinalSpectrum(EpiContext cont
     var spectrum= await context.EpiSpectrumAfters.FirstOrDefaultAsync(e => e.WaferId == waferId);
         if (spectrum != null) {
         var spectrum20mA = new Spectrum() { 
+            _id = ObjectId.GenerateNewId(),
             WaferId = waferId, 
             QuickTestResultId = qtId,Current = 20,
             MeasurementType = MeasurementType.Initial
         };
         var spectrum50mA = new Spectrum(){
+            _id = ObjectId.GenerateNewId(),
             WaferId = waferId, 
             QuickTestResultId = qtId,Current = 50,
             MeasurementType = MeasurementType.Initial

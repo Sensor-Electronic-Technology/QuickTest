@@ -31,6 +31,7 @@ public class QuickTestDataService {
     private readonly IMongoCollection<Spectrum> _initSpectrumCollection;
     private readonly IMongoCollection<Spectrum> _finalSpectrumCollection;
     private ILogger<QuickTestDataService> _logger;
+    private static List<string> _padOrder = ["A","B","C","D","R","T","L","G"];
 
     public QuickTestDataService(ILogger<QuickTestDataService> logger, IMongoClient mongoClient,IOptions<DatabaseSettings> options) {
         this._logger = logger;
@@ -487,7 +488,7 @@ public class QuickTestDataService {
     }
     
     private static void GetPadMeasurement(Dictionary<string,PadMeasurement> measurements, List<string> values) {
-        foreach (var pad in PadLocation.List) {
+        foreach (var pad in _padOrder) {
             if (measurements.ContainsKey(pad)) {
                 values.AddRange([Math.Round(measurements[pad].Wl, 2).ToString(CultureInfo.InvariantCulture),
                     Math.Round(measurements[pad].Power, 2).ToString(CultureInfo.InvariantCulture),
