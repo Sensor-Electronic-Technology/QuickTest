@@ -71,13 +71,13 @@ public class QuickTestDataService {
         if (measurementType == MeasurementType.Initial) {
             var update = Builders<QuickTestResult>.Update
                 .Set(e => e.InitialTested, tested)
-                .Set(e => e.InitialTimeStamp, DateTime.Now);
+                .Set(e => e.InitialTimeStamp, tested ? DateTime.Now : DateTime.MinValue);
             this._logger.LogInformation("Updated {Wafer} InitialTested to {Tested}",waferId,tested);
             await this._qtCollection.UpdateOneAsync(filter,update);
         } else {
             var update = Builders<QuickTestResult>.Update
                 .Set(e => e.FinalTested, tested)
-                .Set(e=>e.FinalTimeStamp,DateTime.Now);
+                .Set(e=>e.FinalTimeStamp,tested ? DateTime.Now : DateTime.MinValue);
             this._logger.LogInformation("Updated {Wafer} FinalTested to {Tested}",waferId,tested);
             var result=await this._qtCollection.UpdateOneAsync(filter,update);
         }

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FastEndpoints;
 using QuickTest.Data.Constants;
 using QuickTest.Data.Contracts.Requests.Put;
@@ -33,6 +34,7 @@ public class MarkTestedEndpoint:Endpoint<MarkTestedRequest,MarkTestedResponse>  
                 Errors = errors
             },cancellation:cancellationToken);
         } else {
+            Console.WriteLine(JsonSerializer.Serialize(request,new JsonSerializerOptions(){WriteIndented = true}));
             await this._qtDataService.MarkTested(request.WaferId,request.Tested,(MeasurementType)request.MeasurementType);
             await SendAsync(new MarkTestedResponse(){Success = true,Errors = ""},cancellation:cancellationToken);
         }
