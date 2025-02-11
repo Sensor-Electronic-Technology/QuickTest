@@ -2,7 +2,7 @@
 @Remote.Api_HostAddress = http://172.20.4.206
 
 ### GET request to get initial data
-GET {{QuickTest.Api_HostAddress}}/api/qt_results/B03-2615-07
+GET {{Remote.Api_HostAddress}}/api/qt_results/B02-3436-06
 Accept: text/plain
 
 ### GET request to get initial data
@@ -34,7 +34,7 @@ GET {{QuickTest.Api_HostAddress}}/api/map/2
 Accept: application/json
 
 ### GET request test
-GET {{QuickTest.Api_HostAddress}}/api/results/excel/B01-4110-14?1
+GET http://172.20.4.206/api/results/excel/B02-3435-24?2
 Accept: application/json
 
 ### GET request test
@@ -42,7 +42,7 @@ GET {{Remote.Api_HostAddress}}/api/quick-test/exists/B01-4110-14
 Accept: application/json
 
 ### GET request test
-GET {{Remote.Api_HostAddress}}/api/map/2
+GET http://172.20.4.206/api/map/2
 Accept: application/json
 
 ### Get Available Pads
@@ -68,4 +68,8 @@ Accept: application/json
 
 ### Delete quick test
 DELETE {{Remote.Api_HostAddress}}/api/quick-tests/delete/B01-0940-14
+Accept: application/json
+
+### Get Wafer Result
+GET http://localhost:5260/api/results/excel/B02-3435-24?measurementType=2
 Accept: application/json

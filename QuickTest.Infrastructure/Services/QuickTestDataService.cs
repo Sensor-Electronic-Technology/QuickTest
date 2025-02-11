@@ -379,22 +379,24 @@ public class QuickTestDataService {
         }
         //List<QtMeasurement> measurements;
         Dictionary<string,PadMeasurement> measurements;
-        StringBuilder builder = new StringBuilder();
+        //StringBuilder builder = new StringBuilder();
         if (type == MeasurementType.Initial) {
             measurements=await this._initMeasureCollection
                 .Find(e => e.QuickTestResultId==qt._id && e.Current==20)
                 .Project(e=>e.Measurements)
                 .FirstOrDefaultAsync();
-            builder.AppendFormat($"{qt.InitialTimeStamp.ToString(CultureInfo.InvariantCulture)}");
+            values.Add(qt.InitialTimeStamp.ToString(CultureInfo.InvariantCulture));
+            //builder.AppendFormat($"{qt.InitialTimeStamp.ToString(CultureInfo.InvariantCulture)}");
         } else {
             measurements=await this._finalMeasureCollection
                 .Find(e => e.QuickTestResultId==qt._id && e.Current==20)
                 .Project(e=>e.Measurements)
                 .FirstOrDefaultAsync();
-            builder.AppendFormat($"{qt.FinalTimeStamp.ToString(CultureInfo.InvariantCulture)}");
+            values.Add(qt.FinalTimeStamp.ToString(CultureInfo.InvariantCulture));
+            //builder.AppendFormat($"{qt.FinalTimeStamp.ToString(CultureInfo.InvariantCulture)}");
         }
         if (measurements.Any()) {
-            values.Add(qt.InitialTimeStamp.ToString(CultureInfo.InvariantCulture));
+            //values.Add(qt.InitialTimeStamp.ToString(CultureInfo.InvariantCulture));
             GetPadMeasurement(measurements,values);
             return values;
         } else {
