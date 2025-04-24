@@ -43,7 +43,21 @@ await CreateWaferMaps();*/
 
 //await CreateLvWaferMap();
 
+await ExportData();
 
+async Task ExportData() {
+    var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
+    var database = mongoClient.GetDatabase("quick_test_db");
+    var qtCollection = database.GetCollection<QuickTestResult>("quick_test");
+    var data=await qtCollection.AsQueryable().Where(e => e.InitialTimeStamp > DateTime.Now.AddMonths(-3))
+        .Select(e => new { e.WaferId , e.InitialTimeStamp,e.FinalTimeStamp}).ToListAsync();
+    await using StreamWriter outputFile = new StreamWriter(Path.Combine(@"C:\Users\aelmendo\Documents\EpiData", "QtInitTestTime-2.csv"));
+    foreach (var item in data) {
+        await outputFile.WriteLineAsync($"{item.WaferId},{item.InitialTimeStamp},{item.FinalTimeStamp}");
+    }
+    outputFile.Close();
+    Console.WriteLine("Check File");
+}
 
 async Task CreateLvWaferMap() {
     var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
