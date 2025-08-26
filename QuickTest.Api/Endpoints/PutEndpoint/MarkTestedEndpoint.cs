@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FastEndpoints;
+using QuickTest.Api.Processors;
 using QuickTest.Data.Constants;
 using QuickTest.Data.Contracts.Requests.Put;
 using QuickTest.Data.Contracts.Responses.Put;
@@ -18,6 +19,7 @@ public class MarkTestedEndpoint:Endpoint<MarkTestedRequest,MarkTestedResponse>  
     public override void Configure() {
         Put(QtApiPaths.MarkTestedPath);
         AllowAnonymous();
+        PostProcessor<MarkCompletedPostProcessor>();
     }
 
     public override async Task HandleAsync(MarkTestedRequest request, CancellationToken cancellationToken) {
@@ -38,6 +40,5 @@ public class MarkTestedEndpoint:Endpoint<MarkTestedRequest,MarkTestedResponse>  
             await this._qtDataService.MarkTested(request.WaferId,request.Tested,(MeasurementType)request.MeasurementType);
             await SendAsync(new MarkTestedResponse(){Success = true,Errors = ""},cancellation:cancellationToken);
         }
-        
     }
 }

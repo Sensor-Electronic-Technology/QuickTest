@@ -23,8 +23,10 @@ switch (hostType) {
         break;
 }*/
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "mongodb://172.20.3.41:27017";
+
 builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection(nameof(DatabaseSettings)));
 builder.Services.AddSingleton<IMongoClient>(new MongoClient(connectionString));
+builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddFastEndpoints(o=>o.IncludeAbstractValidators = true);
@@ -39,6 +41,6 @@ if (app.Environment.IsDevelopment()) {
     app.UseSwaggerUI();
 }*/
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.Run();

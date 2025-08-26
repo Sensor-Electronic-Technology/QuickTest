@@ -13,6 +13,7 @@ using QuickTest.Data.Contracts.Responses;
 using QuickTest.Data.Models.Wafers;
 using QuickTest.Data.Models.Wafers.Enums;
 using QuickTest.Data.Contracts.Requests.Post;
+using QuickTest.Data.Contracts.Requests.Put;
 using QuickTest.Data.Contracts.Responses.Get;
 using QuickTest.Data.DataTransfer;
 using QuickTest.Data.Models;
@@ -43,7 +44,57 @@ await CreateWaferMaps();*/
 
 //await CreateLvWaferMap();
 
-await ExportData();
+HttpClient client = new HttpClient() {
+    BaseAddress = new Uri("http://localhost:5260/")
+};
+
+CreateQuickTestRequest createRequest = new CreateQuickTestRequest() {
+    WaferId = "B03-9991-05",
+    ProbeStationId = 1,
+    WaferSize = 2
+};
+
+var response=await client.PostAsJsonAsync(QtApiPaths.CreateQuickTestPath, createRequest);
+if (response.IsSuccessStatusCode) {
+    Console.WriteLine("Quick Test Created");
+    await Task.Delay(2000);
+    MarkTestedRequest markRequest = new MarkTestedRequest() {
+        WaferId = "B03-9991-05",
+        MeasurementType = (int)MeasurementType.Initial,
+        Tested = true,
+    };
+
+    response = await client.PutAsJsonAsync(QtApiPaths.MarkTestedPath, markRequest);
+
+    if (response.IsSuccessStatusCode) {
+        Console.WriteLine("Initial Completed");
+        await Task.Delay(2000);
+
+        MarkTestedRequest markFinalRequest = new MarkTestedRequest() {
+            WaferId = "B03-9991-05",
+            MeasurementType = (int)MeasurementType.Final,
+            Tested = true,
+        };
+
+        response=await client.PutAsJsonAsync(QtApiPaths.MarkTestedPath, markRequest);
+        if (response.IsSuccessStatusCode) {
+            Console.WriteLine("Final Completed");
+            //await Task.Delay(2000);
+        } else {
+            Console.WriteLine("Error: Could not mark final as tested");
+        }
+
+    } else {
+        Console.WriteLine("Error: Could not mark quick test as tested");
+    }
+} else {
+    Console.WriteLine("Error: Could not create quick test");
+}
+
+
+
+
+//await ExportData();
 
 async Task ExportData() {
     var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
@@ -105,7 +156,6 @@ async Task CreateLvWaferMap() {
     };
     await collection.InsertOneAsync(lvMap);
 }
-
 
 async Task UpdateQuickTestWaferSize() {
     var mongoClient = new MongoClient("mongodb://172.20.3.41:27017/");
