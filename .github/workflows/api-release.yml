@@ -1,11 +1,11 @@
 name: Api Release
 on:
-  push:
-    branches: [ "master" ]
-    paths:
-    - 'QuickTest.Api/**'
-    - 'QuickTest.Infrastructure/**'
-    - '.github/workflows/api-release.yml'
+  # push:
+  #   branches: [ "master" ]
+  #   paths:
+  #   - 'QuickTest.Api/**'
+  #   - 'QuickTest.Infrastructure/**'
+  #   - '.github/workflows/api-release.yml'
   workflow_dispatch:
 jobs:
   build:
