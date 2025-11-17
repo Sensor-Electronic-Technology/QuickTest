@@ -44,55 +44,94 @@ await CreateWaferMaps();*/
 
 //await CreateLvWaferMap();
 
+
 HttpClient client = new HttpClient() {
     BaseAddress = new Uri("http://localhost:5260/")
 };
 
-CreateQuickTestRequest createRequest = new CreateQuickTestRequest() {
-    WaferId = "B03-9991-05",
-    ProbeStationId = 1,
-    WaferSize = 2
+MarkTestedRequest markRequest = new MarkTestedRequest() {
+    WaferId = "B03-9991-01",
+    MeasurementType = (int)MeasurementType.Initial,
+    Tested = true,
 };
 
-var response=await client.PostAsJsonAsync(QtApiPaths.CreateQuickTestPath, createRequest);
+var response = await client.PutAsJsonAsync(QtApiPaths.MarkTestedPath, markRequest);
+
 if (response.IsSuccessStatusCode) {
-    Console.WriteLine("Quick Test Created");
+    Console.WriteLine("Initial Completed");
     await Task.Delay(2000);
-    MarkTestedRequest markRequest = new MarkTestedRequest() {
-        WaferId = "B03-9991-05",
-        MeasurementType = (int)MeasurementType.Initial,
+
+    MarkTestedRequest markFinalRequest = new MarkTestedRequest() {
+        WaferId = "B03-9991-01",
+        MeasurementType = (int)MeasurementType.Final,
         Tested = true,
     };
 
-    response = await client.PutAsJsonAsync(QtApiPaths.MarkTestedPath, markRequest);
-
+    response=await client.PutAsJsonAsync(QtApiPaths.MarkTestedPath, markRequest);
     if (response.IsSuccessStatusCode) {
-        Console.WriteLine("Initial Completed");
-        await Task.Delay(2000);
-
-        MarkTestedRequest markFinalRequest = new MarkTestedRequest() {
-            WaferId = "B03-9991-05",
-            MeasurementType = (int)MeasurementType.Final,
-            Tested = true,
-        };
-
-        response=await client.PutAsJsonAsync(QtApiPaths.MarkTestedPath, markRequest);
-        if (response.IsSuccessStatusCode) {
-            Console.WriteLine("Final Completed");
-            //await Task.Delay(2000);
-        } else {
-            Console.WriteLine("Error: Could not mark final as tested");
-        }
-
+        Console.WriteLine("Final Completed");
+        //await Task.Delay(2000);
     } else {
-        Console.WriteLine("Error: Could not mark quick test as tested");
+        Console.WriteLine("Error: Could not mark final as tested");
     }
+
 } else {
-    Console.WriteLine("Error: Could not create quick test");
+    Console.WriteLine("Error: Could not mark quick test as tested");
 }
 
 
 
+async Task TestingApiChanges() {
+    HttpClient client = new HttpClient() {
+        BaseAddress = new Uri("http://localhost:5260/")
+    };
+
+    CreateQuickTestRequest createRequest = new CreateQuickTestRequest() {
+        WaferId = "B03-9999-06",
+        ProbeStationId = 1,
+        WaferSize = 2
+    };
+
+    var response=await client.PostAsJsonAsync(QtApiPaths.CreateQuickTestPath, createRequest);
+    if (response.IsSuccessStatusCode) {
+        Console.WriteLine("Quick Test Created");
+        await Task.Delay(2000);
+        MarkTestedRequest markRequest = new MarkTestedRequest() {
+            WaferId = "B03-9991-05",
+            MeasurementType = (int)MeasurementType.Initial,
+            Tested = true,
+        };
+
+        response = await client.PutAsJsonAsync(QtApiPaths.MarkTestedPath, markRequest);
+
+        if (response.IsSuccessStatusCode) {
+            Console.WriteLine("Initial Completed");
+            await Task.Delay(2000);
+
+            MarkTestedRequest markFinalRequest = new MarkTestedRequest() {
+                WaferId = "B03-9991-01",
+                MeasurementType = (int)MeasurementType.Final,
+                Tested = true,
+            };
+
+            response=await client.PutAsJsonAsync(QtApiPaths.MarkTestedPath, markRequest);
+            if (response.IsSuccessStatusCode) {
+                Console.WriteLine("Final Completed");
+                //await Task.Delay(2000);
+            } else {
+                Console.WriteLine("Error: Could not mark final as tested");
+            }
+
+        } else {
+            Console.WriteLine("Error: Could not mark quick test as tested");
+        }
+    } else {
+        Console.WriteLine(JsonSerializer.Serialize(response,new JsonSerializerOptions() {
+            WriteIndented = true
+        }));
+        Console.WriteLine("Error: Could not create quick test");
+    }
+}
 
 //await ExportData();
 

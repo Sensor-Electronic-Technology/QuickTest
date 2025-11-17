@@ -5,7 +5,7 @@ using QuickTest.Data.Models.Measurements;
 
 namespace QuickTest.Api.Processors;
 
-public class MarkCompletedPostProcessor:IPostProcessor<MarkTestedRequest,MarkTestedResponse> {
+/*public class MarkCompletedPostProcessor:IPostProcessor<MarkTestedRequest,MarkTestedResponse> {
     private readonly ILogger<MarkCompletedPostProcessor> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
     
@@ -39,4 +39,4 @@ public class MarkCompletedPostProcessor:IPostProcessor<MarkTestedRequest,MarkTes
             }
         }
     }
-}
+}*/

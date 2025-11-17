@@ -10,6 +10,7 @@ using QuickTest.Data.AppSettings;
 using QuickTest.Data.Models.Measurements;
 using ErrorOr;
 using MongoDB.Bson;
+using QuickTest.Data.Contracts.Events;
 using QuickTest.Data.Contracts.Requests.Put;
 using QuickTest.Data.DataTransfer;
 using QuickTest.Data.Models;
@@ -80,6 +81,51 @@ public class QuickTestDataService {
                 .Set(e=>e.FinalTimeStamp,tested ? DateTime.Now : DateTime.MinValue);
             this._logger.LogInformation("Updated {Wafer} FinalTested to {Tested}",waferId,tested);
             var result=await this._qtCollection.UpdateOneAsync(filter,update);
+        }
+    }
+    
+    public async Task<ErrorOr<UpdateEpiSystemEvent>> MarkTestedV2(string waferId,bool tested, MeasurementType measurementType) {
+        var filter=Builders<QuickTestResult>.Filter.Eq(e=>e.WaferId,waferId);
+        if (measurementType == MeasurementType.Initial) {
+            var update = Builders<QuickTestResult>.Update
+                .Set(e => e.InitialTested, tested)
+                .Set(e => e.InitialTimeStamp, tested ? DateTime.Now : DateTime.MinValue);
+            this._logger.LogInformation("Updated {Wafer} InitialTested to {Tested}",waferId,tested);
+            var qt = await this._qtCollection.FindOneAndUpdateAsync(filter, update,
+                new FindOneAndUpdateOptions<QuickTestResult>() {
+                    ReturnDocument = ReturnDocument.After,
+                });
+            if (qt==null) {
+                this._logger.LogError("Failed to update Initial QuickTestResult for {WaferId}, FindOneAndUpdateFailed",waferId);
+                return Error.Failure(description: $"Failed to update QuickTestResult for {waferId}, FindOneAndUpdateFailed");
+            }
+
+            return new UpdateEpiSystemEvent() {
+                WaferId = waferId,
+                ReferenceId = qt._id.ToString(),
+                MeasurementType = measurementType
+            };
+            //await this._qtCollection.UpdateOneAsync(filter,update);
+
+        } else {
+            var update = Builders<QuickTestResult>.Update
+                .Set(e => e.FinalTested, tested)
+                .Set(e=>e.FinalTimeStamp,tested ? DateTime.Now : DateTime.MinValue);
+            this._logger.LogInformation("Updated {Wafer} FinalTested to {Tested}",waferId,tested);
+            var qt = await this._qtCollection.FindOneAndUpdateAsync(filter, update,
+                new FindOneAndUpdateOptions<QuickTestResult>() {
+                    ReturnDocument = ReturnDocument.After,
+                });
+            if (qt==null) {
+                this._logger.LogError("Failed to update Final QuickTestResult for {WaferId}, FindOneAndUpdateFailed",waferId);
+                return Error.Failure(description: $"Failed to update QuickTestResult for {waferId}, FindOneAndUpdateFailed");
+            }
+
+            return new UpdateEpiSystemEvent() {
+                WaferId = waferId,
+                ReferenceId = qt._id.ToString(),
+                MeasurementType = measurementType
+            };
         }
     }
     

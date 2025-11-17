@@ -2,6 +2,7 @@ using System.Text.Json;
 using FastEndpoints;
 using QuickTest.Api.Processors;
 using QuickTest.Data.Constants;
+using QuickTest.Data.Contracts.Events;
 using QuickTest.Data.Contracts.Requests.Put;
 using QuickTest.Data.Contracts.Responses.Put;
 using QuickTest.Data.Models.Measurements;
@@ -19,7 +20,7 @@ public class MarkTestedEndpoint:Endpoint<MarkTestedRequest,MarkTestedResponse>  
     public override void Configure() {
         Put(QtApiPaths.MarkTestedPath);
         AllowAnonymous();
-        PostProcessor<MarkCompletedPostProcessor>();
+        //PostProcessor<MarkCompletedPostProcessor>();
     }
 
     public override async Task HandleAsync(MarkTestedRequest request, CancellationToken cancellationToken) {
@@ -37,7 +38,15 @@ public class MarkTestedEndpoint:Endpoint<MarkTestedRequest,MarkTestedResponse>  
             },cancellation:cancellationToken);
         } else {
             Console.WriteLine(JsonSerializer.Serialize(request,new JsonSerializerOptions(){WriteIndented = true}));
-            await this._qtDataService.MarkTested(request.WaferId,request.Tested,(MeasurementType)request.MeasurementType);
+            var result=await this._qtDataService.MarkTestedV2(request.WaferId,request.Tested,(MeasurementType)request.MeasurementType);
+            if(result.IsError) {
+                await SendAsync(new MarkTestedResponse() {
+                    Success = false,
+                    Errors = result.FirstError.Description
+                },cancellation:cancellationToken);
+            }
+            await this.PublishAsync(result.Value,Mode.WaitForNone,cancellationToken);
+            
             await SendAsync(new MarkTestedResponse(){Success = true,Errors = ""},cancellation:cancellationToken);
         }
     }
