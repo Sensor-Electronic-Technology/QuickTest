@@ -30,14 +30,13 @@ public class MarkTestedEndpoint:Endpoint<MarkTestedRequest,MarkTestedResponse>  
             errors="WaferId cannot be null or empty";
             error = true;
         }
-
         if (error) {
             await SendAsync(new MarkTestedResponse() {
                 Success = false,
                 Errors = errors
             },cancellation:cancellationToken);
         } else {
-            Console.WriteLine(JsonSerializer.Serialize(request,new JsonSerializerOptions(){WriteIndented = true}));
+            //Console.WriteLine(JsonSerializer.Serialize(request,new JsonSerializerOptions(){WriteIndented = true}));
             var result=await this._qtDataService.MarkTestedV2(request.WaferId,request.Tested,(MeasurementType)request.MeasurementType);
             if(result.IsError) {
                 await SendAsync(new MarkTestedResponse() {

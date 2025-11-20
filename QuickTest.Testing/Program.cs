@@ -67,7 +67,7 @@ if (response.IsSuccessStatusCode) {
         Tested = true,
     };
 
-    response=await client.PutAsJsonAsync(QtApiPaths.MarkTestedPath, markRequest);
+    response=await client.PutAsJsonAsync(QtApiPaths.MarkTestedPath, markFinalRequest);
     if (response.IsSuccessStatusCode) {
         Console.WriteLine("Final Completed");
         //await Task.Delay(2000);
